@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bethflow — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ─── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Linear palette */
+  --canvas:       #08090a;
+  --panel:        #0f1011;
+  --surface:      #191a1b;
+  --hover:        #28282c;
+  --border-soft:  rgba(255,255,255,0.05);
+  --border-std:   rgba(255,255,255,0.08);
+  --border-solid: #23252a;
+  /* text */
+  --t-primary:  #f7f8f8;
+  --t-secondary:#d0d6e0;
+  --t-muted:    #8a8f98;
+  --t-dim:      #62666d;
+  /* brand */
+  --indigo:     #5e6ad2;
+  --violet:     #7170ff;
+  --violet-h:   #828fff;
+  --green:      #27a644;
+  --green-done: #10b981;
+  /* sidebar width */
+  --sb: 240px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-feature-settings: "cv01","ss03";
+  background: var(--canvas);
+  color: var(--t-secondary);
+  display: flex;
+}
+
+/* ─── Entry screen overlay ───────────────────────────── */
+#entry-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--canvas);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  animation: overlay-exit 0.5s cubic-bezier(0.4,0,0.2,1) 1.4s forwards;
+}
+
+.entry-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: logo-pop 0.55s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;
+}
+
+.entry-logo-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--indigo);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+
+.entry-logo-text {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--t-primary);
+}
+
+.entry-bar-wrap {
+  width: 200px;
+  height: 2px;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+  animation: fade-in 0.3s ease 0.55s forwards;
+}
+
+.entry-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--indigo), var(--violet));
+  border-radius: 2px;
+  animation: bar-fill 0.85s cubic-bezier(0.4,0,0.2,1) 0.65s forwards;
+}
+
+.entry-label {
+  font-size: 13px;
+  color: var(--t-dim);
+  letter-spacing: -0.13px;
+  opacity: 0;
+  animation: fade-in 0.3s ease 0.7s forwards;
+}
+
+@keyframes overlay-exit {
+  to { opacity: 0; pointer-events: none; transform: scale(0.98); }
+}
+@keyframes logo-pop {
+  from { opacity: 0; transform: scale(0.92) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes bar-fill {
+  to { width: 100%; }
+}
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+
+/* ─── Sidebar ────────────────────────────────────────── */
+aside {
+  width: var(--sb);
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  /* entry animation */
+  transform: translateX(-16px);
+  opacity: 0;
+  animation: sb-enter 0.55s cubic-bezier(0.16,1,0.3,1) 1.7s forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes sb-enter {
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.sb-logo {
+  display: flex; align-items: center; gap: 8px;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.sb-logo-icon {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: var(--indigo);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #fff;
+}
+.sb-logo-text {
+  font-size: 15px; font-weight: 600;
+  letter-spacing: -0.15px;
+  color: var(--t-primary);
+}
+
+.sb-section {
+  padding: 10px 8px 4px;
+}
+.sb-section-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--t-dim);
+  text-transform: uppercase;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 14px; font-weight: 510;
+  color: var(--t-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--t-secondary); }
+.nav-item.active { background: rgba(255,255,255,0.05); color: var(--t-primary); }
+.nav-item .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 11px; font-weight: 600;
+  background: var(--indigo);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  min-width: 18px; text-align: center;
+}
+
+.sb-divider {
+  height: 1px;
+  background: var(--border-soft);
+  margin: 8px 16px;
+}
+
+.sb-user {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 10px;
+}
+.sb-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo), var(--violet));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: #fff;
+  flex-shrink: 0;
+}
+.sb-user-info { flex: 1; min-width: 0; }
+.sb-user-name { font-size: 13px; font-weight: 510; color: var(--t-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-user-role { font-size: 11px; color: var(--t-dim); }
+
+/* ─── Main area ──────────────────────────────────────── */
+main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-solid) transparent;
+}
+
+/* ─── Top bar ────────────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky; top: 0; z-index: 10;
+  background: var(--canvas);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  animation: fade-up 0.45s cubic-bezier(0.16,1,0.3,1) 1.9s forwards;
+}
+
+.topbar-title {
+  font-size: 15px; font-weight: 590;
+  color: var(--t-primary);
+  letter-spacing: -0.15px;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-std);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer;
+  transition: background 0.12s;
+  color: var(--t-muted);
+}
+.icon-btn:hover { background: rgba(255,255,255,0.06); color: var(--t-secondary); }
+
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-std);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px; color: var(--t-muted);
+  cursor: text;
+  transition: border-color 0.15s;
+}
+.search-bar:hover { border-color: rgba(255,255,255,0.14); }
+.search-kbd {
+  margin-left: auto;
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border-std);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--t-dim);
+  font-family: inherit;
+}
+
+/* ─── Content ────────────────────────────────────────── */
+.content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1100px;
+}
+
+/* stagger helper */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  will-change: transform, opacity;
+}
+.r1 { animation: fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 2.0s forwards; }
+.r2 { animation: fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 2.1s forwards; }
+.r3 { animation: fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 2.2s forwards; }
+.r4 { animation: fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 2.3s forwards; }
+.r5 { animation: fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 2.4s forwards; }
+.r6 { animation: fade-up 0.5s cubic-bezier(0.16,1,0.3,1) 2.55s forwards; }
+
+@keyframes fade-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Greeting ───────────────────────────────────────── */
+.greeting-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+}
+.greeting-text h1 {
+  font-size: 24px; font-weight: 400;
+  color: var(--t-primary);
+  letter-spacing: -0.288px;
+  line-height: 1.2;
+}
+.greeting-text h1 span {
+  background: linear-gradient(90deg, var(--violet), #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.greeting-text p {
+  margin-top: 4px;
+  font-size: 14px; color: var(--t-dim);
+  letter-spacing: -0.13px;
+}
+.btn-primary {
+  padding: 8px 16px;
+  background: var(--indigo);
+  color: #fff;
+  border: none; border-radius: 6px;
+  font-size: 13px; font-weight: 510;
+  font-feature-settings: "cv01","ss03";
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--violet-h); transform: translateY(-1px); }
+
+/* ─── Stats row ──────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border-std);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-label {
+  font-size: 12px; font-weight: 510;
+  color: var(--t-muted);
+  letter-spacing: 0;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 28px; font-weight: 510;
+  color: var(--t-primary);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+/* count-up target */
+.stat-value[data-count] { transition: none; }
+
+.stat-delta {
+  font-size: 12px;
+  display: flex; align-items: center; gap: 4px;
+}
+.delta-up   { color: var(--green-done); }
+.delta-down { color: #ef4444; }
+
+.stat-sparkline {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 80px; height: 44px;
+  opacity: 0.5;
+}
+
+/* ─── Two-col layout ─────────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ─── Success graph card ─────────────────────────────── */
+.graph-card {
+  background: var(--surface);
+  border: 1px solid var(--border-std);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 14px; font-weight: 590;
+  color: var(--t-primary);
+  letter-spacing: -0.13px;
+}
+.card-subtitle {
+  font-size: 12px; color: var(--t-dim);
+  margin-top: 2px;
+}
+.pill-tabs {
+  display: flex; gap: 2px;
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px; padding: 2px;
+}
+.pill-tab {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px; font-weight: 510;
+  color: var(--t-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.pill-tab.active {
+  background: var(--surface);
+  color: var(--t-primary);
+}
+
+.graph-wrap {
+  position: relative;
+  height: 180px;
+}
+
+.graph-grid-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+svg.graph-svg {
+  width: 100%; height: 100%;
+  overflow: visible;
+}
+
+/* animated line draw */
+.graph-line {
+  stroke: var(--violet);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: line-draw 1.4s cubic-bezier(0.4,0,0.2,1) 2.5s forwards;
+  will-change: stroke-dashoffset;
+}
+.graph-area {
+  fill: url(#areaGrad);
+  opacity: 0;
+  animation: area-reveal 0.5s ease 3.7s forwards;
+}
+.graph-dot {
+  fill: var(--violet);
+  opacity: 0;
+  transition: r 0.15s, opacity 0.15s;
+}
+.graph-dot.visible { opacity: 1; }
+.graph-dot:hover { r: 5; }
+
+@keyframes line-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes area-reveal {
+  to { opacity: 1; }
+}
+
+.graph-x-labels {
+  display: flex; justify-content: space-between;
+  margin-top: 8px;
+  padding: 0 2px;
+}
+.graph-x-label {
+  font-size: 11px; color: var(--t-dim);
+  letter-spacing: 0;
+}
+
+/* graph legend */
+.graph-legend {
+  display: flex; gap: 16px; margin-top: 14px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--t-muted);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+/* ─── Activity feed ──────────────────────────────────── */
+.activity-card {
+  background: var(--surface);
+  border: 1px solid var(--border-std);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.activity-list {
+  list-style: none;
+}
+
+.activity-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  opacity: 0;
+  transform: translateX(8px);
+  will-change: transform, opacity;
+}
+.activity-item:last-child { border-bottom: none; }
+
+.act-1 { animation: act-enter 0.4s cubic-bezier(0.16,1,0.3,1) 2.7s forwards; }
+.act-2 { animation: act-enter 0.4s cubic-bezier(0.16,1,0.3,1) 2.82s forwards; }
+.act-3 { animation: act-enter 0.4s cubic-bezier(0.16,1,0.3,1) 2.94s forwards; }
+.act-4 { animation: act-enter 0.4s cubic-bezier(0.16,1,0.3,1) 3.06s forwards; }
+.act-5 { animation: act-enter 0.4s cubic-bezier(0.16,1,0.3,1) 3.18s forwards; }
+
+@keyframes act-enter {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.act-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--hover);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.act-body { flex: 1; min-width: 0; }
+.act-text {
+  font-size: 13px; color: var(--t-secondary);
+  line-height: 1.4;
+}
+.act-text strong { color: var(--t-primary); font-weight: 510; }
+.act-time {
+  font-size: 11px; color: var(--t-dim);
+  margin-top: 2px;
+}
+
+/* ─── Boards section ─────────────────────────────────── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: 14px; font-weight: 590;
+  color: var(--t-primary);
+  letter-spacing: -0.13px;
+}
+.link-btn {
+  font-size: 13px; color: var(--violet);
+  background: none; border: none;
+  cursor: pointer; font-feature-settings: "cv01","ss03";
+  transition: color 0.12s;
+}
+.link-btn:hover { color: var(--violet-h); }
+
+.boards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.board-card {
+  background: var(--surface);
+  border: 1px solid var(--border-std);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+.board-card:hover {
+  border-color: rgba(113,112,255,0.35);
+  transform: translateY(-2px);
+  background: var(--hover);
+}
+
+.board-card-cover {
+  height: 52px;
+}
+.cover-purple  { background: linear-gradient(135deg, #3b3498, #5e6ad2); }
+.cover-teal    { background: linear-gradient(135deg, #0d7377, #14a085); }
+.cover-amber   { background: linear-gradient(135deg, #92400e, #d97706); }
+.cover-pink    { background: linear-gradient(135deg, #831843, #db2777); }
+.cover-indigo  { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+.cover-neutral { background: linear-gradient(135deg, #1c1c20, #2d2d35); }
+
+.board-card-body { padding: 10px 12px 12px; }
+.board-name {
+  font-size: 13px; font-weight: 590;
+  color: var(--t-primary);
+  letter-spacing: -0.1px;
+  margin-bottom: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.board-meta {
+  font-size: 11px; color: var(--t-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+.board-progress {
+  margin-top: 8px;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.board-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--violet);
+  width: 0;
+  transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── Bottom row ─────────────────────────────────────── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── Task list mini ─────────────────────────────────── */
+.task-list { display: flex; flex-direction: column; }
+.task-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+}
+.task-item:last-child { border-bottom: none; }
+.task-check {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-std);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.task-check.done {
+  background: var(--green-done);
+  border-color: var(--green-done);
+  color: #fff;
+}
+.task-text { flex: 1; color: var(--t-secondary); }
+.task-text.done { text-decoration: line-through; color: var(--t-dim); }
+.task-due { font-size: 11px; color: var(--t-dim); flex-shrink: 0; }
+.task-due.overdue { color: #ef4444; }
+
+/* ─── Quick links ────────────────────────────────────── */
+.quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.quick-item {
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.quick-item:hover {
+  border-color: rgba(255,255,255,0.1);
+  background: var(--surface);
+}
+.quick-icon { font-size: 18px; }
+.quick-label { font-size: 12px; font-weight: 590; color: var(--t-secondary); }
+.quick-sub   { font-size: 11px; color: var(--t-dim); }
+
+/* ─── Status chip ────────────────────────────────────── */
+.status-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  font-size: 11px; font-weight: 510;
+}
+.chip-green  { background: rgba(16,185,129,0.1); color: var(--green-done); }
+.chip-yellow { background: rgba(245,158,11,0.1);  color: #f59e0b; }
+.chip-red    { background: rgba(239,68,68,0.1);   color: #ef4444; }
+.chip-indigo { background: rgba(94,106,210,0.12); color: var(--violet); }
+
+.status-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: currentColor;
+}
+
+/* ─── Reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  #entry-overlay { animation: none; opacity: 0; pointer-events: none; }
+  .entry-logo, .entry-bar-wrap, .entry-label,
+  aside, .topbar, .reveal, .activity-item,
+  .graph-line, .graph-area, .board-progress-fill { animation: none !important; opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important; }
+  .board-progress-fill { width: var(--target-w, 50%); }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+main::-webkit-scrollbar { width: 4px; }
+main::-webkit-scrollbar-track { background: transparent; }
+main::-webkit-scrollbar-thumb { background: var(--border-solid); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ─── Entry overlay ───────────────────────────────── -->
+<div id="entry-overlay" role="status" aria-live="polite">
+  <div class="entry-logo">
+    <div class="entry-logo-icon">⚡</div>
+    <span class="entry-logo-text">Bethflow</span>
+  </div>
+  <div class="entry-bar-wrap">
+    <div class="entry-bar"></div>
+  </div>
+  <span class="entry-label">Loading your workspace…</span>
+</div>
+
+<!-- ─── Sidebar ────────────────────────────────────── -->
+<aside aria-label="Sidebar navigation">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">⚡</div>
+    <span class="sb-logo-text">Bethflow</span>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Workspace</div>
+    <div class="nav-item active"><span class="nav-icon">◎</span> Dashboard</div>
+    <div class="nav-item"><span class="nav-icon">▦</span> Boards <span class="nav-badge">4</span></div>
+    <div class="nav-item"><span class="nav-icon">◈</span> Projects</div>
+    <div class="nav-item"><span class="nav-icon">▤</span> Catalog</div>
+    <div class="nav-item"><span class="nav-icon">◫</span> Timeline</div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <div class="sb-section">
+    <div class="sb-section-label">Personal</div>
+    <div class="nav-item"><span class="nav-icon">◉</span> My Tasks <span class="nav-badge" style="background:rgba(239,68,68,0.18);color:#ef4444;">3</span></div>
+    <div class="nav-item"><span class="nav-icon">⊞</span> Social Links</div>
+    <div class="nav-item"><span class="nav-icon">◎</span> Queue</div>
+    <div class="nav-item"><span class="nav-icon">⊙</span> Settings</div>
+  </div>
+
+  <div class="sb-user">
+    <div class="sb-avatar">M</div>
+    <div class="sb-user-info">
+      <div class="sb-user-name">Muhammad Zirld</div>
+      <div class="sb-user-role">Member · Free plan</div>
+    </div>
+    <span style="font-size:14px;color:var(--t-dim);cursor:pointer">⋯</span>
+  </div>
+</aside>
+
+<!-- ─── Main ────────────────────────────────────────── -->
+<main>
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-title">Dashboard</span>
+    <div class="search-bar">
+      <span style="font-size:13px">⌕</span>
+      <span>Search…</span>
+      <kbd class="search-kbd">⌘K</kbd>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" title="Notifications">🔔</button>
+      <button class="icon-btn" title="Help">?</button>
+      <div class="sb-avatar" style="width:28px;height:28px;font-size:11px;cursor:pointer">M</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ─ Greeting ──────────────────────────────────── -->
+    <div class="greeting-row reveal r1">
+      <div class="greeting-text">
+        <h1 id="greeting-text">Good morning, <span>Muhammad</span> 👋</h1>
+        <p>You have <strong style="color:var(--t-secondary)">3 overdue tasks</strong> and <strong style="color:var(--t-secondary)">2 boards</strong> with activity today.</p>
+      </div>
+      <button class="btn-primary">
+        <span>＋</span> New board
+      </button>
+    </div>
+
+    <!-- ─ Stats ─────────────────────────────────────── -->
+    <div class="stats-grid reveal r2">
+
+      <div class="stat-card">
+        <div class="stat-label">Active boards</div>
+        <div class="stat-value" data-count="4" data-suffix="">4</div>
+        <div class="stat-delta delta-up">↑ 1 this week</div>
+        <svg class="stat-sparkline" viewBox="0 0 80 44" preserveAspectRatio="none">
+          <polyline points="0,30 16,25 32,32 48,20 64,22 80,14" stroke="var(--violet)" stroke-width="1.5" fill="none" opacity="0.7"/>
+        </svg>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Tasks completed</div>
+        <div class="stat-value" data-count="128" data-suffix="">0</div>
+        <div class="stat-delta delta-up">↑ 12 this week</div>
+        <svg class="stat-sparkline" viewBox="0 0 80 44" preserveAspectRatio="none">
+          <polyline points="0,38 16,34 32,28 48,20 64,16 80,10" stroke="var(--green-done)" stroke-width="1.5" fill="none" opacity="0.7"/>
+        </svg>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">In progress</div>
+        <div class="stat-value" data-count="24" data-suffix="">0</div>
+        <div class="stat-delta delta-down">↓ 3 from last week</div>
+        <svg class="stat-sparkline" viewBox="0 0 80 44" preserveAspectRatio="none">
+          <polyline points="0,18 16,20 32,16 48,22 64,28 80,30" stroke="#f59e0b" stroke-width="1.5" fill="none" opacity="0.7"/>
+        </svg>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Success rate</div>
+        <div class="stat-value" data-count="87" data-suffix="%">0%</div>
+        <div class="stat-delta delta-up">↑ 4% this month</div>
+        <svg class="stat-sparkline" viewBox="0 0 80 44" preserveAspectRatio="none">
+          <polyline points="0,36 16,30 32,26 48,22 64,16 80,12" stroke="var(--green-done)" stroke-width="1.5" fill="none" opacity="0.7"/>
+        </svg>
+      </div>
+
+    </div>
+
+    <!-- ─ Graph + Activity ──────────────────────────── -->
+    <div class="two-col">
+
+      <!-- Success graph -->
+      <div class="graph-card reveal r3">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Success Graph</div>
+            <div class="card-subtitle">Task completion over time</div>
+          </div>
+          <div class="pill-tabs">
+            <div class="pill-tab active">7d</div>
+            <div class="pill-tab">30d</div>
+            <div class="pill-tab">90d</div>
+          </div>
+        </div>
+
+        <div class="graph-wrap">
+          <svg class="graph-svg" viewBox="0 0 560 180" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#7170ff" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#7170ff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- grid lines -->
+            <line x1="0" y1="40"  x2="560" y2="40"  stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <line x1="0" y1="80"  x2="560" y2="80"  stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="560" y2="120" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <line x1="0" y1="160" x2="560" y2="160" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+            <!-- y-axis labels -->
+            <text x="4" y="43"  font-size="10" fill="#62666d">100</text>
+            <text x="4" y="83"  font-size="10" fill="#62666d">75</text>
+            <text x="4" y="123" font-size="10" fill="#62666d">50</text>
+            <text x="4" y="163" font-size="10" fill="#62666d">25</text>
+
+            <!-- area fill -->
+            <path class="graph-area"
+              d="M28,148 C80,140 112,125 168,100 C224,75 280,90 336,72 C392,54 448,38 532,28 L532,180 L28,180 Z"/>
+
+            <!-- line -->
+            <polyline class="graph-line"
+              points="28,148 112,125 168,100 224,112 280,90 336,72 392,68 448,50 532,28"/>
+
+            <!-- dots -->
+            <circle class="graph-dot" cx="28"  cy="148" r="3.5"/>
+            <circle class="graph-dot" cx="112" cy="125" r="3.5"/>
+            <circle class="graph-dot" cx="168" cy="100" r="3.5"/>
+            <circle class="graph-dot" cx="224" cy="112" r="3.5"/>
+            <circle class="graph-dot" cx="280" cy="90"  r="3.5"/>
+            <circle class="graph-dot" cx="336" cy="72"  r="3.5"/>
+            <circle class="graph-dot" cx="392" cy="68"  r="3.5"/>
+            <circle class="graph-dot" cx="448" cy="50"  r="3.5"/>
+            <circle class="graph-dot" cx="532" cy="28"  r="3.5"/>
+          </svg>
+        </div>
+
+        <div class="graph-x-labels">
+          <span class="graph-x-label">Mon</span>
+          <span class="graph-x-label">Tue</span>
+          <span class="graph-x-label">Wed</span>
+          <span class="graph-x-label">Thu</span>
+          <span class="graph-x-label">Fri</span>
+          <span class="graph-x-label">Sat</span>
+          <span class="graph-x-label">Sun</span>
+        </div>
+
+        <div class="graph-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--violet)"></div>
+            Tasks completed
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:rgba(113,112,255,0.3)"></div>
+            Area fill
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="activity-card reveal r3">
+        <div class="card-header" style="padding:16px 16px 12px">
+          <div class="card-title">Recent Activity</div>
+          <button class="link-btn">See all</button>
+        </div>
+        <ul class="activity-list">
+          <li class="activity-item act-1">
+            <div class="act-icon">✓</div>
+            <div class="act-body">
+              <div class="act-text"><strong>Card "Design mockup"</strong> moved to Done</div>
+              <div class="act-time">2 min ago · Sprint Board</div>
+            </div>
+          </li>
+          <li class="activity-item act-2">
+            <div class="act-icon">＋</div>
+            <div class="act-body">
+              <div class="act-text"><strong>New card</strong> added to In Progress</div>
+              <div class="act-time">18 min ago · API Integration</div>
+            </div>
+          </li>
+          <li class="activity-item act-3">
+            <div class="act-icon">◉</div>
+            <div class="act-body">
+              <div class="act-text"><strong>Milestone</strong> "Beta Launch" approaching</div>
+              <div class="act-time">1 hr ago · Q3 Roadmap</div>
+            </div>
+          </li>
+          <li class="activity-item act-4">
+            <div class="act-icon">✎</div>
+            <div class="act-body">
+              <div class="act-text"><strong>Description</strong> updated on "Auth flow"</div>
+              <div class="act-time">3 hr ago · Backend Board</div>
+            </div>
+          </li>
+          <li class="activity-item act-5">
+            <div class="act-icon">🔗</div>
+            <div class="act-body">
+              <div class="act-text"><strong>Social link</strong> profile updated</div>
+              <div class="act-time">Yesterday · Profile</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ─ Recent boards ──────────────────────────────── -->
+    <div class="reveal r4">
+      <div class="section-header">
+        <span class="section-title">Recent Boards</span>
+        <button class="link-btn">View all →</button>
+      </div>
+      <div class="boards-grid">
+
+        <div class="board-card" data-progress="72">
+          <div class="board-card-cover cover-purple"></div>
+          <div class="board-card-body">
+            <div class="board-name">Sprint Board</div>
+            <div class="board-meta">
+              <span class="status-chip chip-green"><span class="status-dot"></span>Active</span>
+              · 14 cards
+            </div>
+            <div class="board-progress"><div class="board-progress-fill"></div></div>
+          </div>
+        </div>
+
+        <div class="board-card" data-progress="41">
+          <div class="board-card-cover cover-teal"></div>
+          <div class="board-card-body">
+            <div class="board-name">API Integration</div>
+            <div class="board-meta">
+              <span class="status-chip chip-yellow"><span class="status-dot"></span>In Progress</span>
+              · 9 cards
+            </div>
+            <div class="board-progress"><div class="board-progress-fill" style="background:linear-gradient(90deg,#14a085,#10b981)"></div></div>
+          </div>
+        </div>
+
+        <div class="board-card" data-progress="88">
+          <div class="board-card-cover cover-amber"></div>
+          <div class="board-card-body">
+            <div class="board-name">Q3 Roadmap</div>
+            <div class="board-meta">
+              <span class="status-chip chip-green"><span class="status-dot"></span>On Track</span>
+              · 22 cards
+            </div>
+            <div class="board-progress"><div class="board-progress-fill" style="background:linear-gradient(90deg,#d97706,#f59e0b)"></div></div>
+          </div>
+        </div>
+
+        <div class="board-card" data-progress="15">
+          <div class="board-card-cover cover-pink"></div>
+          <div class="board-card-body">
+            <div class="board-name">Marketing Assets</div>
+            <div class="board-meta">
+              <span class="status-chip chip-red"><span class="status-dot"></span>Blocked</span>
+              · 6 cards
+            </div>
+            <div class="board-progress"><div class="board-progress-fill" style="background:linear-gradient(90deg,#db2777,#ec4899)"></div></div>
+          </div>
+        </div>
+
+        <div class="board-card" data-progress="55">
+          <div class="board-card-cover cover-indigo"></div>
+          <div class="board-card-body">
+            <div class="board-name">Backend Board</div>
+            <div class="board-meta">
+              <span class="status-chip chip-indigo"><span class="status-dot"></span>Review</span>
+              · 11 cards
+            </div>
+            <div class="board-progress"><div class="board-progress-fill" style="background:linear-gradient(90deg,#2563eb,#5e6ad2)"></div></div>
+          </div>
+        </div>
+
+        <!-- New board slot -->
+        <div class="board-card" style="cursor:pointer; display:flex; align-items:center; justify-content:center; min-height:110px; border-style:dashed; border-color:rgba(255,255,255,0.1);">
+          <div style="text-align:center; color:var(--t-dim)">
+            <div style="font-size:22px; margin-bottom:6px">＋</div>
+            <div style="font-size:12px; font-weight:510">New board</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─ Bottom row ─────────────────────────────────── -->
+    <div class="bottom-row reveal r5">
+
+      <!-- My tasks -->
+      <div class="graph-card" style="padding:16px 20px">
+        <div class="card-header" style="margin-bottom:12px">
+          <div class="card-title">My Tasks</div>
+          <span class="status-chip chip-red"><span class="status-dot"></span>3 overdue</span>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <span class="task-text done">Write API docs for auth module</span>
+            <span class="task-due">May 10</span>
+          </div>
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <span class="task-text done">Design review with team</span>
+            <span class="task-due">May 11</span>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <span class="task-text">Implement drag-and-drop cards</span>
+            <span class="task-due overdue">May 09 ↑</span>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <span class="task-text">Set up Redis cache layer</span>
+            <span class="task-due overdue">May 10 ↑</span>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <span class="task-text">Deploy staging environment</span>
+            <span class="task-due">May 15</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="graph-card" style="padding:16px 20px">
+        <div class="card-header" style="margin-bottom:12px">
+          <div class="card-title">Quick Access</div>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-item">
+            <div class="quick-icon">▦</div>
+            <div class="quick-label">Sprint Board</div>
+            <div class="quick-sub">14 open cards</div>
+          </div>
+          <div class="quick-item">
+            <div class="quick-icon">◈</div>
+            <div class="quick-label">Q3 Timeline</div>
+            <div class="quick-sub">Jun 30 deadline</div>
+          </div>
+          <div class="quick-item">
+            <div class="quick-icon">⊞</div>
+            <div class="quick-label">Social Links</div>
+            <div class="quick-sub">8 links active</div>
+          </div>
+          <div class="quick-item">
+            <div class="quick-icon">▤</div>
+            <div class="quick-label">Catalog</div>
+            <div class="quick-sub">32 items</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<script>
+  /* ─ Greeting by time of day ─ */
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting-text').innerHTML =
+    `${greet}, <span>Muhammad</span> ${hour < 12 ? '👋' : hour < 18 ? '☀️' : '🌙'}`;
+
+  /* ─ Stat count-up ─ */
+  function countUp(el) {
+    const target = parseInt(el.dataset.count, 10);
+    const suffix = el.dataset.suffix || '';
+    const dur = 900;
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(ease * target) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* trigger count-up and board progress after dashboard appears */
+  setTimeout(() => {
+    document.querySelectorAll('.stat-value[data-count]').forEach(countUp);
+  }, 2100);
+
+  setTimeout(() => {
+    document.querySelectorAll('.board-card').forEach(card => {
+      const pct = card.dataset.progress;
+      if (!pct) return;
+      const fill = card.querySelector('.board-progress-fill');
+      if (fill) fill.style.width = pct + '%';
+    });
+    /* show graph dots */
+    document.querySelectorAll('.graph-dot').forEach((dot, i) => {
+      setTimeout(() => dot.classList.add('visible'), i * 120 + 200);
+    });
+  }, 2600);
+
+  /* ─ Pill tab switch ─ */
+  document.querySelectorAll('.pill-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.closest('.pill-tabs').querySelectorAll('.pill-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  /* ─ Task check toggle ─ */
+  document.querySelectorAll('.task-check:not(.done)').forEach(check => {
+    check.addEventListener('click', () => {
+      check.classList.toggle('done');
+      check.textContent = check.classList.contains('done') ? '✓' : '';
+      const textEl = check.nextElementSibling;
+      if (textEl) textEl.classList.toggle('done');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "bethflow",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "docker compose up",
+    "dev:api": "npm -w apps/api run dev",
+    "dev:web": "npm -w apps/web run dev",
+    "build": "npm -w packages/shared run build && npm -w apps/api run build && npm -w apps/web run build",
+    "lint": "npm -ws run lint",
+    "test": "npm -ws run test",
+    "typecheck": "npm -ws run typecheck"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "eslint": "^9.14.0",
+    "typescript": "^5.6.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yaml,yml}": ["prettier --write"]
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

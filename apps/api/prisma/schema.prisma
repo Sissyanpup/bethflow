@@ -1,0 +1,204 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GUEST
+  USER
+  ADMIN
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  displayName  String?
+  avatarUrl    String?
+  bio          String?
+  isActive     Boolean  @default(true)
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  boards        Board[]
+  projects      Project[]
+  catalogs      Catalog[]
+  socialLinks   SocialLink[]
+  feedbacks     Feedback[]
+  refreshTokens RefreshToken[]
+  cardComments  CardComment[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  color       String?
+  isPublic    Boolean  @default(false)
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  lists       List[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model List {
+  id         String   @id @default(cuid())
+  title      String
+  position   Int
+  isArchived Boolean  @default(false)
+  boardId    String
+  board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards      Card[]
+  createdAt  DateTime @default(now())
+
+  @@index([boardId])
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  mediaUrl    String?
+  color       String?
+  position    Int
+  isArchived  Boolean   @default(false)
+  startDate   DateTime?
+  endDate     DateTime?
+  listId      String
+  list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  catalogId   String?
+  catalog     Catalog?  @relation(fields: [catalogId], references: [id])
+  checklist   ChecklistItem[]
+  comments    CardComment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([listId])
+  @@index([catalogId])
+}
+
+model ChecklistItem {
+  id        String   @id @default(cuid())
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  text      String
+  isChecked Boolean  @default(false)
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@index([cardId])
+}
+
+model CardComment {
+  id        String   @id @default(cuid())
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cardId])
+  @@index([userId])
+}
+
+model Catalog {
+  id        String    @id @default(cuid())
+  title     String
+  content   String?
+  mediaUrl  String?
+  startDate DateTime?
+  endDate   DateTime?
+  ownerId   String
+  owner     User      @relation(fields: [ownerId], references: [id])
+  cards     Card[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([ownerId])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  status      TaskStatus @default(TODO)
+  position    Int
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([projectId])
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform  String
+  label     String
+  url       String
+  iconSlug  String?
+  isVisible Boolean  @default(true)
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

@@ -1,0 +1,36 @@
+export const SOCIAL_PLATFORMS = {
+  // Common
+  facebook: { label: 'Facebook', baseUrl: 'https://facebook.com/', iconSlug: 'facebook' },
+  instagram: { label: 'Instagram', baseUrl: 'https://instagram.com/', iconSlug: 'instagram' },
+  twitter: { label: 'Twitter/X', baseUrl: 'https://x.com/', iconSlug: 'x' },
+  tiktok: { label: 'TikTok', baseUrl: 'https://tiktok.com/@', iconSlug: 'tiktok' },
+  linkedin: { label: 'LinkedIn', baseUrl: 'https://linkedin.com/in/', iconSlug: 'linkedin' },
+  youtube: { label: 'YouTube', baseUrl: 'https://youtube.com/', iconSlug: 'youtube' },
+  telegram: { label: 'Telegram', baseUrl: 'https://t.me/', iconSlug: 'telegram' },
+  whatsapp: { label: 'WhatsApp', baseUrl: 'https://wa.me/', iconSlug: 'whatsapp' },
+  github: { label: 'GitHub', baseUrl: 'https://github.com/', iconSlug: 'github' },
+  gitlab: { label: 'GitLab', baseUrl: 'https://gitlab.com/', iconSlug: 'gitlab' },
+  email: { label: 'Email', baseUrl: 'mailto:', iconSlug: 'gmail' },
+  website: { label: 'Website', baseUrl: '', iconSlug: 'internetexplorer' },
+  // Uncommon
+  discord: { label: 'Discord', baseUrl: 'https://discord.gg/', iconSlug: 'discord' },
+  snapchat: { label: 'Snapchat', baseUrl: 'https://snapchat.com/add/', iconSlug: 'snapchat' },
+  pinterest: { label: 'Pinterest', baseUrl: 'https://pinterest.com/', iconSlug: 'pinterest' },
+  reddit: { label: 'Reddit', baseUrl: 'https://reddit.com/u/', iconSlug: 'reddit' },
+  twitch: { label: 'Twitch', baseUrl: 'https://twitch.tv/', iconSlug: 'twitch' },
+  mastodon: { label: 'Mastodon', baseUrl: '', iconSlug: 'mastodon' },
+  bluesky: { label: 'Bluesky', baseUrl: 'https://bsky.app/profile/', iconSlug: 'bluesky' },
+  threads: { label: 'Threads', baseUrl: 'https://threads.net/@', iconSlug: 'threads' },
+  line: { label: 'Line', baseUrl: 'https://line.me/ti/p/', iconSlug: 'line' },
+  kofi: { label: 'Ko-fi', baseUrl: 'https://ko-fi.com/', iconSlug: 'kofi' },
+  patreon: { label: 'Patreon', baseUrl: 'https://patreon.com/', iconSlug: 'patreon' },
+  behance: { label: 'Behance', baseUrl: 'https://behance.net/', iconSlug: 'behance' },
+  dribbble: { label: 'Dribbble', baseUrl: 'https://dribbble.com/', iconSlug: 'dribbble' },
+  medium: { label: 'Medium', baseUrl: 'https://medium.com/@', iconSlug: 'medium' },
+  substack: { label: 'Substack', baseUrl: 'https://substack.com/@', iconSlug: 'substack' },
+  spotify: { label: 'Spotify', baseUrl: 'https://open.spotify.com/', iconSlug: 'spotify' },
+  soundcloud: { label: 'SoundCloud', baseUrl: 'https://soundcloud.com/', iconSlug: 'soundcloud' },
+  custom: { label: 'Custom', baseUrl: '', iconSlug: null },
+} as const;
+
+export type PlatformKey = keyof typeof SOCIAL_PLATFORMS;
