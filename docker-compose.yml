@@ -65,9 +65,29 @@ services:
     working_dir: /workspace/apps/web
     command: npm run dev
 
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - api
+    env_file: .env
+    environment:
+      - API_BASE_URL=http://api:4000
+    volumes:
+      - .:/workspace
+      - bot_node_modules:/workspace/apps/bot/node_modules
+      - bot_data:/workspace/apps/bot/data
+    working_dir: /workspace/apps/bot
+    command: npm run dev
+
 volumes:
   postgres_data:
   api_node_modules:
   api_app_node_modules:
   web_node_modules:
   web_app_node_modules:
+  bot_node_modules:
+  bot_data:

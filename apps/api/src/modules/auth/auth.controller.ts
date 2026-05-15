@@ -130,3 +130,28 @@ export async function logout(req: Request, res: Response): Promise<void> {
   res.clearCookie(REFRESH_COOKIE, { path: '/api/auth' });
   res.json({ success: true, data: null });
 }
+
+export async function issueBotToken(req: Request, res: Response): Promise<void> {
+  const { email, password } = req.body as { email: string; password: string };
+  try {
+    const result = await authService.createBotToken(email, password);
+    res.status(201).json({ success: true, data: result });
+  } catch (err) {
+    const e = err as Error & { code?: string };
+    if (e.code === 'UNAUTHORIZED') {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: e.message } });
+      return;
+    }
+    if (e.code === 'EMAIL_NOT_VERIFIED') {
+      res.status(403).json({ success: false, error: { code: 'EMAIL_NOT_VERIFIED', message: e.message } });
+      return;
+    }
+    throw err;
+  }
+}
+
+export async function revokeMyBotToken(req: Request, res: Response): Promise<void> {
+  const token = req.headers.authorization!.slice(7);
+  await authService.revokeBotToken(token);
+  res.json({ success: true, data: null });
+}

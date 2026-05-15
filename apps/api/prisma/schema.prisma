@@ -42,6 +42,7 @@ model User {
   feedbacks     Feedback[]
   refreshTokens RefreshToken[]
   cardComments  CardComment[]
+  botTokens     BotToken[]
 }
 
 model RefreshToken {
@@ -206,6 +207,18 @@ model OtpToken {
   createdAt DateTime @default(now())
 
   @@index([email])
+}
+
+model BotToken {
+  id         String    @id @default(cuid())
+  token      String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  @@index([userId])
 }
 
 model Feedback {

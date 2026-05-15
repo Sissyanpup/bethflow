@@ -165,6 +165,37 @@ async function issueTokens(
   };
 }
 
+const BOT_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+export async function createBotToken(email: string, password: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.isActive) {
+    throw Object.assign(new Error('Invalid email or password'), { code: 'UNAUTHORIZED' });
+  }
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) {
+    throw Object.assign(new Error('Invalid email or password'), { code: 'UNAUTHORIZED' });
+  }
+  if (!user.isVerified) {
+    throw Object.assign(new Error('Email belum diverifikasi'), { code: 'EMAIL_NOT_VERIFIED' });
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + BOT_TOKEN_TTL_MS);
+
+  await prisma.botToken.create({ data: { token, userId: user.id, expiresAt } });
+
+  return {
+    token,
+    expiresAt: expiresAt.toISOString(),
+    user: { id: user.id, email: user.email, username: user.username, displayName: user.displayName },
+  };
+}
+
+export async function revokeBotToken(token: string) {
+  await prisma.botToken.deleteMany({ where: { token } });
+}
+
 function sanitizeUser(user: {
   id: string;
   email: string;
