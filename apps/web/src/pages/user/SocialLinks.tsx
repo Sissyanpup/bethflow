@@ -152,12 +152,12 @@ export function SocialLinksPage() {
                 value={form.platform}
                 onChange={(e) => handlePlatformChange(e.target.value)}
                 style={{
-                  width: '100%', background: 'rgba(255,255,255,0.06)', border: '1.5px solid var(--lin-border-2)',
-                  borderRadius: 8, padding: '9px 12px', color: 'var(--lin-text-1)', fontSize: 14,
-                  outline: 'none',
+                  width: '100%', background: '#1c1c1f', border: '1.5px solid var(--lin-border-2)',
+                  borderRadius: 8, padding: '9px 12px', color: '#e4e4e7', fontSize: 14,
+                  outline: 'none', colorScheme: 'dark',
                 }}>
                 {Object.entries(SOCIAL_PLATFORMS).map(([key, val]) => (
-                  <option key={key} value={key}>{val.label}</option>
+                  <option key={key} value={key} style={{ background: '#1c1c1f', color: '#e4e4e7' }}>{val.label}</option>
                 ))}
               </select>
             </div>
