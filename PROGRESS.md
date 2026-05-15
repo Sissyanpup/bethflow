@@ -1,4 +1,4 @@
-# Bethflow — Progress Snapshot (2026-05-15 rev7)
+# Bethflow — Progress Snapshot (2026-05-15 rev8)
 
 > Ringkasan status proyek untuk AI agent. Baca ini sebelum mulai bekerja.
 
@@ -13,7 +13,7 @@
 | Redis 7                  | ✅ Up + healthy                                                                 |
 | API (Express 5)          | ✅ Running `:4000`                                                              |
 | Web (React + Vite)       | ✅ Running `:5173`                                                              |
-| Prisma migration         | ✅ Applied (`20260515000001_add_card_task_link`)                                |
+| Prisma migration         | ✅ Applied (`20260515000002_add_catalog_group`)                                 |
 | DB seed                  | ✅ Done — admin + demo user + dummy data                                        |
 | Semua halaman            | ✅ Diverifikasi di browser (rev3)                                               |
 | Card Modal (Trello)      | ✅ Implemented (rev4)                                                           |
@@ -39,6 +39,11 @@
 | CardModal task status    | ✅ Implemented (rev7) — TaskStatusPicker in sidebar when task is linked          |
 | Catalog status dots      | ✅ Implemented (rev7) — Status count badges on catalog cards                    |
 | Responsive Gantt mobile  | ✅ Fixed (rev7) — task name col: clamp(200px,30vw,360px)                       |
+| Auth hard-refresh logout | ✅ Fixed (rev8) — AppRoot wrapper calls refresh() before RouterProvider renders  |
+| Logo login/regis link    | ✅ Fixed (rev8) — Left-panel logo in AuthLayout wrapped with Link to="/"        |
+| ProjectDetail task modal | ✅ Implemented (rev8) — Edit task modal: title, description, status, dates      |
+| Task add form            | ✅ Enhanced (rev8) — Add task form now includes description + status selector    |
+| Catalogs group system    | ✅ Implemented (rev8) — group field (DB + API + UI): grouped view + edit modal  |
 
 ---
 

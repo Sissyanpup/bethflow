@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { api } from '../../lib/api.js';
 import { format, differenceInDays, addDays, eachWeekOfInterval } from 'date-fns';
 import {
   IconPlus, IconX, IconCheck, IconCalendar, IconCheckCircle,
-  IconAlertCircle, IconTarget, IconClock,
+  IconAlertCircle, IconTarget, IconClock, IconPencil,
 } from '../../components/ui/icons.js';
 
 interface Task {
@@ -33,16 +33,18 @@ const GANTT_COLORS: Record<string, string> = {
   BLOCKED:     'linear-gradient(90deg, #dc2626, #ef4444)',
 };
 
+interface TaskFormState { title: string; description: string; status: string; startDate: string; endDate: string; }
+
 export function ProjectDetailPage() {
   const { projectId } = useParams({ from: '/user-layout/projects/$projectId' });
   const qc = useQueryClient();
-  const [addingTask, setAddingTask] = useState(false);
   const today = new Date();
-  const [newTask, setNewTask] = useState({
-    title: '',
-    startDate: format(today, 'yyyy-MM-dd'),
-    endDate: format(addDays(today, 7), 'yyyy-MM-dd'),
-  });
+
+  const emptyNew: TaskFormState = { title: '', description: '', status: 'TODO', startDate: format(today, 'yyyy-MM-dd'), endDate: format(addDays(today, 7), 'yyyy-MM-dd') };
+  const [addingTask, setAddingTask] = useState(false);
+  const [newTask, setNewTask] = useState<TaskFormState>(emptyNew);
+  const [editTask, setEditTask] = useState<Task | null>(null);
+  const [editForm, setEditForm] = useState<TaskFormState>(emptyNew);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   const { data: project, isLoading } = useQuery({
@@ -60,16 +62,31 @@ export function ProjectDetailPage() {
   });
 
   const createTask = useMutation({
-    mutationFn: () => api.post(`/projects/${projectId}/tasks`, {
-      title: newTask.title,
-      startDate: new Date(newTask.startDate).toISOString(),
-      endDate: new Date(newTask.endDate).toISOString(),
-      status: 'TODO',
+    mutationFn: (f: TaskFormState) => api.post(`/projects/${projectId}/tasks`, {
+      title: f.title,
+      ...(f.description.trim() ? { description: f.description.trim() } : {}),
+      status: f.status,
+      startDate: new Date(f.startDate).toISOString(),
+      endDate: new Date(f.endDate).toISOString(),
     }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['project', projectId] });
       setAddingTask(false);
-      setNewTask({ title: '', startDate: format(today, 'yyyy-MM-dd'), endDate: format(addDays(today, 7), 'yyyy-MM-dd') });
+      setNewTask(emptyNew);
+    },
+  });
+
+  const updateTask = useMutation({
+    mutationFn: ({ taskId, f }: { taskId: string; f: TaskFormState }) => api.patch(`/tasks/${taskId}`, {
+      title: f.title,
+      description: f.description.trim() || null,
+      status: f.status,
+      startDate: new Date(f.startDate).toISOString(),
+      endDate: new Date(f.endDate).toISOString(),
+    }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['project', projectId] });
+      setEditTask(null);
     },
   });
 
@@ -77,6 +94,17 @@ export function ProjectDetailPage() {
     mutationFn: (taskId: string) => api.delete(`/tasks/${taskId}`),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['project', projectId] }),
   });
+
+  const openEditTask = (t: Task) => {
+    setEditTask(t);
+    setEditForm({
+      title: t.title,
+      description: t.description ?? '',
+      status: t.status,
+      startDate: t.startDate.slice(0, 10),
+      endDate: t.endDate.slice(0, 10),
+    });
+  };
 
   if (isLoading) return <GanttSkeleton />;
   if (!project) return <div style={{ padding: 40, color: 'var(--air-text-3)' }}>Project not found.</div>;
@@ -99,6 +127,61 @@ export function ProjectDetailPage() {
 
   return (
     <div style={{ minHeight: '100%', background: 'var(--air-bg)', color: 'var(--air-text-1)' }}>
+      {/* Edit task modal */}
+      {editTask && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setEditTask(null)}>
+          <div style={{ background: 'var(--air-surface)', borderRadius: 14, padding: '24px 26px', width: '100%', maxWidth: 520, boxShadow: '0 24px 64px rgba(0,0,0,0.2)', border: '1px solid var(--air-border)' }} onClick={(e) => e.stopPropagation()} className="anim-scale-in">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--air-text-1)' }}>Edit task</span>
+              <button onClick={() => setEditTask(null)} style={{ color: 'var(--air-text-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><IconX size={18} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>TITLE *</label>
+                <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="input" autoFocus />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>DESCRIPTION</label>
+                <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="input" rows={3} style={{ resize: 'vertical', fontFamily: 'inherit' }} placeholder="Add task details…" />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>STATUS</label>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {STATUS_ORDER.map((s) => {
+                    const m = STATUS_META[s]!;
+                    const active = editForm.status === s;
+                    return (
+                      <button key={s} onClick={() => setEditForm({ ...editForm, status: s })} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, border: active ? `2px solid ${m.color}` : '2px solid transparent', background: active ? m.bg : 'var(--air-secondary)', color: m.color, cursor: 'pointer', transition: 'all 0.15s' }}>
+                        <m.Icon size={12} /> {m.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>START DATE</label>
+                  <input type="date" value={editForm.startDate} onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })} className="input" style={{ fontSize: 13 }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>END DATE</label>
+                  <input type="date" value={editForm.endDate} onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })} className="input" style={{ fontSize: 13 }} />
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button
+                onClick={() => { if (editForm.title.trim()) updateTask.mutate({ taskId: editTask.id, f: editForm }); }}
+                disabled={!editForm.title.trim() || updateTask.isPending}
+                style={{ padding: '9px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, background: 'linear-gradient(135deg, #166ee1, #06b6d4)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: !editForm.title.trim() ? 0.5 : 1 }}>
+                {updateTask.isPending ? <span className="spinner spinner-dark" style={{ width: 15, height: 15 }} /> : <IconCheck size={14} />} Save changes
+              </button>
+              <button onClick={() => setEditTask(null)} style={{ padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: 'var(--air-secondary)', color: 'var(--air-text-2)', border: '1.5px solid var(--air-border)', cursor: 'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="page-content" style={{ background: 'var(--air-surface)', borderBottom: '1px solid var(--air-border)', paddingBottom: 20 }}>
         <div className="anim-fade-up" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, justifyContent: 'space-between', flexWrap: 'wrap' }}>
@@ -142,10 +225,31 @@ export function ProjectDetailPage() {
         <div className="reveal-form page-content" style={{ background: 'var(--air-surface)', borderBottom: '1px solid var(--air-border)', paddingBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--air-text-1)' }}>New task</span>
-            <button onClick={() => setAddingTask(false)} style={{ color: 'var(--air-text-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><IconX size={18} /></button>
+            <button onClick={() => { setAddingTask(false); setNewTask(emptyNew); }} style={{ color: 'var(--air-text-3)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><IconX size={18} /></button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px 160px', gap: 12, marginBottom: 14 }}>
-            <input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="Task title…" autoFocus className="input" onKeyDown={(e) => { if (e.key === 'Enter' && newTask.title.trim()) createTask.mutate(); if (e.key === 'Escape') setAddingTask(false); }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>TITLE *</label>
+              <input value={newTask.title} onChange={(e) => setNewTask({ ...newTask, title: e.target.value })} placeholder="Task title…" autoFocus className="input" onKeyDown={(e) => { if (e.key === 'Enter' && newTask.title.trim()) createTask.mutate(newTask); if (e.key === 'Escape') { setAddingTask(false); setNewTask(emptyNew); } }} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>DESCRIPTION (optional)</label>
+              <textarea value={newTask.description} onChange={(e) => setNewTask({ ...newTask, description: e.target.value })} placeholder="Add task details…" className="input" rows={2} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>STATUS</label>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {STATUS_ORDER.map((s) => {
+                  const m = STATUS_META[s]!;
+                  const active = newTask.status === s;
+                  return (
+                    <button key={s} onClick={() => setNewTask({ ...newTask, status: s })} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, border: active ? `2px solid ${m.color}` : '2px solid transparent', background: active ? m.bg : 'var(--air-secondary)', color: m.color, cursor: 'pointer', transition: 'all 0.15s' }}>
+                      <m.Icon size={12} /> {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--air-text-3)', marginBottom: 5 }}>START DATE</label>
               <input type="date" value={newTask.startDate} onChange={(e) => setNewTask({ ...newTask, startDate: e.target.value })} className="input" style={{ fontSize: 13 }} />
@@ -156,10 +260,10 @@ export function ProjectDetailPage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => { if (newTask.title.trim()) createTask.mutate(); }} disabled={!newTask.title.trim() || createTask.isPending} style={{ padding: '9px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, background: 'linear-gradient(135deg, #166ee1, #06b6d4)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: !newTask.title.trim() ? 0.5 : 1 }}>
+            <button onClick={() => { if (newTask.title.trim()) createTask.mutate(newTask); }} disabled={!newTask.title.trim() || createTask.isPending} style={{ padding: '9px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, background: 'linear-gradient(135deg, #166ee1, #06b6d4)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: !newTask.title.trim() ? 0.5 : 1 }}>
               {createTask.isPending ? <span className="spinner spinner-dark" style={{ width: 15, height: 15 }} /> : <IconCheck size={14} />} Create task
             </button>
-            <button onClick={() => setAddingTask(false)} style={{ padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: 'var(--air-surface)', color: 'var(--air-text-2)', border: '1.5px solid var(--air-border)', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={() => { setAddingTask(false); setNewTask(emptyNew); }} style={{ padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: 'var(--air-secondary)', color: 'var(--air-text-2)', border: '1.5px solid var(--air-border)', cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
       )}
@@ -215,15 +319,21 @@ export function ProjectDetailPage() {
                   <div style={{ width: 'clamp(200px, 30vw, 360px)', flexShrink: 0, padding: '10px 16px', borderRight: '1px solid var(--air-border)', display: 'flex', gap: 10, alignItems: 'center' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--air-text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</div>
-                      <div style={{ fontSize: 11, color: 'var(--air-text-3)', marginTop: 3 }}>{format(new Date(task.startDate), 'MMM d')} – {format(new Date(task.endDate), 'MMM d, yyyy')}</div>
+                      {task.description && <div style={{ fontSize: 11, color: 'var(--air-text-3)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
+                      <div style={{ fontSize: 11, color: 'var(--air-text-3)', marginTop: 2 }}>{format(new Date(task.startDate), 'MMM d')} – {format(new Date(task.endDate), 'MMM d, yyyy')}</div>
                     </div>
                     <button onClick={() => { const i = STATUS_ORDER.indexOf(task.status as typeof STATUS_ORDER[number]); updateStatus.mutate({ taskId: task.id, status: STATUS_ORDER[(i + 1) % STATUS_ORDER.length]! }); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0 }} title="Click to cycle status">
                       <Icon size={11} /> {meta.label}
                     </button>
                     {isHov && (
-                      <button onClick={() => deleteTask.mutate(task.id)} style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.12s' }} onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.2)'; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; }}>
-                        <IconX size={12} />
-                      </button>
+                      <>
+                        <button onClick={() => openEditTask(task)} style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(22,110,225,0.1)', color: '#166ee1', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.12s' }} title="Edit task" onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(22,110,225,0.2)'; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(22,110,225,0.1)'; }}>
+                          <IconPencil size={12} />
+                        </button>
+                        <button onClick={() => deleteTask.mutate(task.id)} style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.12s' }} title="Delete task" onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.2)'; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; }}>
+                          <IconX size={12} />
+                        </button>
+                      </>
                     )}
                   </div>
                   <div style={{ flex: 1, position: 'relative', padding: '8px 16px', height: 44 }}>
@@ -261,7 +371,7 @@ function GanttSkeleton() {
         <div className="skeleton-light" style={{ height: 8, borderRadius: 4 }} />
       </div>
       <div style={{ padding: '0' }}>
-        {[1,2,3,4].map((i) => (
+        {[1, 2, 3, 4].map((i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', height: 44, borderBottom: '1px solid var(--air-border)' }}>
             <div style={{ width: 'clamp(200px, 30vw, 360px)', padding: '0 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
               <div className="skeleton-light" style={{ flex: 1, height: 14 }} />

@@ -139,6 +139,7 @@ model Catalog {
   title     String
   content   String?
   mediaUrl  String?
+  group     String?
   startDate DateTime?
   endDate   DateTime?
   ownerId   String

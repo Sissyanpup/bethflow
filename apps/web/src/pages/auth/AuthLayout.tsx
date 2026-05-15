@@ -40,7 +40,7 @@ export function AuthLayout() {
         ))}
 
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 1 }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 1, textDecoration: 'none' }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
             background: 'rgba(255,255,255,0.2)',
@@ -56,7 +56,7 @@ export function AuthLayout() {
             </svg>
           </div>
           <span style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Bethflow</span>
-        </div>
+        </Link>
 
         {/* Hero text */}
         <div style={{ position: 'relative', zIndex: 1 }}>

@@ -73,6 +73,6 @@ async function assertOwner(id: string, ownerId: string) {
   if (catalog.ownerId !== ownerId) throw Object.assign(new Error('Forbidden'), { code: 'FORBIDDEN' });
 }
 
-function serialize(c: { id: string; title: string; content: string | null; mediaUrl: string | null; startDate: Date | null; endDate: Date | null; ownerId: string; createdAt: Date; updatedAt: Date }) {
+function serialize(c: { id: string; title: string; content: string | null; mediaUrl: string | null; group: string | null; startDate: Date | null; endDate: Date | null; ownerId: string; createdAt: Date; updatedAt: Date }) {
   return { ...c, startDate: c.startDate?.toISOString() ?? null, endDate: c.endDate?.toISOString() ?? null, createdAt: c.createdAt.toISOString(), updatedAt: c.updatedAt.toISOString() };
 }

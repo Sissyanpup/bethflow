@@ -4,6 +4,7 @@ export const CreateCatalogSchema = z.object({
   title: z.string().min(1).max(200),
   content: z.string().max(5000).optional(),
   mediaUrl: z.string().url().optional(),
+  group: z.string().max(100).optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
 });
