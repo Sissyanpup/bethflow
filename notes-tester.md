@@ -256,3 +256,82 @@ Item: Perbaiki ESLint di container (package missing)
 File/Lokasi: root package.json / container
 
 Kalau keenam item ini diselesaikan, proyek ini layak deploy ke staging/production.
+
+# Deploy
+
+Proyek ini punya 5 service Docker (postgres + redis + api + web + bot) — ini yang
+menentukan pilihan. Layanan "serverless" seperti Vercel/Netlify tidak cocok karena
+Redis, Postgres, dan Telegram bot butuh proses yang selalu berjalan.
+
+---
+
+Rekomendasi
+
+Gratis Selamanya
+
+Oracle Cloud Free Tier
+
+- 2 VM AMD (1 GB RAM each) atau 1 VM Arm (4 vCPU, 24 GB RAM) — gratis permanen
+- Cukup untuk jalankan docker compose up langsung
+- 50 GB block storage gratis
+- Syarat: daftar pakai kartu kredit (tidak dicharge jika pakai free tier)
+- Link: cloud.oracle.com
+
+▎ Ini pilihan terbaik jika mau gratis selamanya. Setup-nya persis seperti dev — SSH ke
+▎ VM, git clone, docker compose up -d.
+
+---
+
+Sangat Murah (~$4–5/bulan)
+
+┌───────────────┬───────────┬──────────────────────┬─────────────────┐
+│ Layanan │ Harga │ Spesifikasi │ Cocok? │
+├───────────────┼───────────┼──────────────────────┼─────────────────┤
+│ Hetzner CAX11 │ €3.79/bln │ 2 vCPU Arm, 4 GB RAM │ ✅ Terbaik │
+├───────────────┼───────────┼──────────────────────┼─────────────────┤
+│ Contabo VPS S │ €4.99/bln │ 4 vCPU, 8 GB RAM │ ✅ Murah banget │
+├───────────────┼───────────┼──────────────────────┼─────────────────┤
+│ DigitalOcean │ $4/bln │ 1 vCPU, 512 MB RAM │ ⚠ RAM mepet │
+├───────────────┼───────────┼──────────────────────┼─────────────────┤
+│ Vultr │ $2.50/bln │ 1 vCPU, 512 MB RAM │ ⚠ RAM mepet │
+└───────────────┴───────────┴──────────────────────┴─────────────────┘
+
+Hetzner adalah pilihan berbayar terbaik — €3.79 dengan 4 GB RAM sangat nyaman untuk 5
+service Docker ini.
+
+---
+
+Platform PaaS (Lebih mudah setup, tapi lebih mahal/kompleks)
+
+┌─────────┬────────────────┬──────────────────────────────────────────────────────┐
+│ Layanan │ Estimasi │ Catatan │
+├─────────┼────────────────┼──────────────────────────────────────────────────────┤
+│ Railway │ ~$5–10/bln │ Docker support bagus, tapi harga per-resource │
+├─────────┼────────────────┼──────────────────────────────────────────────────────┤
+│ Fly.io │ $0–5/bln │ Free tier ada, tapi Redis + Postgres bisa kena │
+│ │ │ charge │
+├─────────┼────────────────┼──────────────────────────────────────────────────────┤
+│ Render │ Free tier │ Web service tidur setelah 15 menit idle — bot mati │
+│ │ tidur │ │
+└─────────┴────────────────┴──────────────────────────────────────────────────────┘
+
+PaaS tidak disarankan untuk proyek ini karena harus split tiap service (api, web, bot,
+postgres, redis masing-masing jadi service terpisah) — lebih rumit daripada langsung
+VPS.
+
+---
+
+Rekomendasi Final
+
+Gratis → Oracle Cloud Free Tier (ARM 4 vCPU 24GB)
+Berbayar → Hetzner CAX11 (€3.79/bln, 4GB RAM)
+
+Di keduanya, cara deploy persis sama:
+git clone <repo>
+cd betha-trello
+
+## isi .env dengan kredensial prod
+
+docker compose up -d
+
+Tidak perlu ubah konfigurasi apapun karena proyek ini sudah Docker-ready.
