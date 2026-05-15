@@ -5,10 +5,27 @@ import type { CreateCatalogInput, UpdateCatalogInput } from '@bethflow/shared';
 export async function listCatalogs(ownerId: string, page: number, limit: number) {
   const where = { ownerId };
   const [catalogs, total] = await Promise.all([
-    prisma.catalog.findMany({ where, skip: (page - 1) * limit, take: limit, orderBy: { updatedAt: 'desc' } }),
+    prisma.catalog.findMany({
+      where, skip: (page - 1) * limit, take: limit, orderBy: { updatedAt: 'desc' },
+      include: {
+        cards: {
+          where: { isArchived: false, taskId: { not: null } },
+          include: { linkedTask: { select: { status: true } } },
+        },
+      },
+    }),
     prisma.catalog.count({ where }),
   ]);
-  return { catalogs: catalogs.map(serialize), total };
+  return {
+    catalogs: catalogs.map((c) => {
+      const counts: Record<string, number> = {};
+      for (const card of c.cards) {
+        if (card.linkedTask) counts[card.linkedTask.status] = (counts[card.linkedTask.status] ?? 0) + 1;
+      }
+      return { ...serialize(c), taskStatusCounts: counts };
+    }),
+    total,
+  };
 }
 
 export async function getCatalog(id: string, ownerId: string) {

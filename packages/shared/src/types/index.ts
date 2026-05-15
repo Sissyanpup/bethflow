@@ -89,6 +89,8 @@ export interface Card {
   isArchived: boolean;
   startDate: string | null;
   endDate: string | null;
+  taskId: string | null;
+  taskStatus: TaskStatus | null;
   listId: string;
   catalogId: string | null;
   createdAt: string;
@@ -118,6 +120,7 @@ export interface CardDetail extends Card {
   checklist: ChecklistItem[];
   comments: CardComment[];
   catalog: { id: string; title: string } | null;
+  linkedTask: { id: string; status: TaskStatus; projectId: string } | null;
 }
 
 export interface UserPublicStats {

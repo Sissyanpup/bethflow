@@ -24,6 +24,7 @@ export async function getCardDetail(id: string, userId: string) {
     include: {
       list: { include: { board: true } },
       catalog: { select: { id: true, title: true } },
+      linkedTask: { select: { id: true, status: true, projectId: true } },
       checklist: { orderBy: { position: 'asc' } },
       comments: {
         include: { user: { select: { username: true, displayName: true, avatarUrl: true } } },
@@ -35,6 +36,8 @@ export async function getCardDetail(id: string, userId: string) {
   if (card.list.board.ownerId !== userId) throw Object.assign(new Error('Forbidden'), { code: 'FORBIDDEN' });
   return {
     ...card,
+    taskId: card.taskId ?? null,
+    taskStatus: card.linkedTask?.status ?? null,
     startDate: card.startDate?.toISOString() ?? null,
     endDate: card.endDate?.toISOString() ?? null,
     createdAt: card.createdAt.toISOString(),
@@ -74,7 +77,7 @@ export async function createCard(listId: string, userId: string, data: CreateCar
 }
 
 export async function updateCard(id: string, userId: string, data: UpdateCardInput) {
-  await assertCardOwner(id, userId);
+  const existing = await assertCardOwner(id, userId);
   const card = await prisma.card.update({
     where: { id },
     data: {
@@ -82,11 +85,56 @@ export async function updateCard(id: string, userId: string, data: UpdateCardInp
       startDate: data.startDate !== undefined ? (data.startDate ? new Date(data.startDate) : null) : undefined,
       endDate: data.endDate !== undefined ? (data.endDate ? new Date(data.endDate) : null) : undefined,
     },
+    include: { list: true, linkedTask: { select: { id: true, status: true } } },
   });
 
-  const boardId = await getBoardIdForList(card.listId);
-  emitBoardEvent(boardId, 'card:updated', card);
+  // Auto-link to timeline when both dates are set
+  const newStart = card.startDate ?? null;
+  const newEnd = card.endDate ?? null;
+  if (newStart && newEnd) {
+    await autoLinkToTimeline(card as typeof card & { list: { title: string }; taskId: string | null }, userId, newStart, newEnd);
+  }
+
+  const boardId = existing.list.boardId;
+  emitBoardEvent(boardId, 'card:updated', { ...card, taskStatus: card.linkedTask?.status ?? null });
   return card;
+}
+
+async function autoLinkToTimeline(
+  card: { id: string; title: string; taskId: string | null; list: { title: string } },
+  userId: string,
+  startDate: Date,
+  endDate: Date,
+) {
+  // If already linked, just update task dates
+  if (card.taskId) {
+    await prisma.task.update({
+      where: { id: card.taskId },
+      data: { startDate, endDate },
+    });
+    return;
+  }
+
+  // Find or create project named after the list
+  const projectTitle = card.list.title;
+  let project = await prisma.project.findFirst({ where: { ownerId: userId, title: projectTitle } });
+  if (!project) {
+    project = await prisma.project.create({ data: { title: projectTitle, ownerId: userId } });
+  }
+
+  // Create task and link it
+  const maxPos = await prisma.task.aggregate({ where: { projectId: project.id }, _max: { position: true } });
+  const task = await prisma.task.create({
+    data: {
+      title: card.title,
+      startDate,
+      endDate,
+      status: 'TODO',
+      position: (maxPos._max.position ?? -1) + 1,
+      projectId: project.id,
+    },
+  });
+  await prisma.card.update({ where: { id: card.id }, data: { taskId: task.id } });
 }
 
 export async function deleteCard(id: string, userId: string) {

@@ -123,7 +123,7 @@ export function ProjectDetailPage() {
                 <span style={{ fontSize: 12, color: 'var(--air-text-3)', fontWeight: 500 }}>Overall progress</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#166ee1' }}>{progress}%</span>
               </div>
-              <div style={{ height: 6, background: '#e5e7eb', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ height: 6, background: 'var(--air-border)', borderRadius: 3, overflow: 'hidden' }}>
                 <div style={{ height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #166ee1, #06b6d4)', width: `${progress}%`, animation: 'progressFill 0.8s var(--ease-out) both', boxShadow: '0 0 8px rgba(22,110,225,0.4)' }} />
               </div>
             </div>
@@ -159,7 +159,7 @@ export function ProjectDetailPage() {
             <button onClick={() => { if (newTask.title.trim()) createTask.mutate(); }} disabled={!newTask.title.trim() || createTask.isPending} style={{ padding: '9px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, background: 'linear-gradient(135deg, #166ee1, #06b6d4)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: !newTask.title.trim() ? 0.5 : 1 }}>
               {createTask.isPending ? <span className="spinner spinner-dark" style={{ width: 15, height: 15 }} /> : <IconCheck size={14} />} Create task
             </button>
-            <button onClick={() => setAddingTask(false)} style={{ padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: '#fff', color: 'var(--air-text-2)', border: '1.5px solid var(--air-border)', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={() => setAddingTask(false)} style={{ padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: 'var(--air-surface)', color: 'var(--air-text-2)', border: '1.5px solid var(--air-border)', cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
       )}
@@ -184,7 +184,7 @@ export function ProjectDetailPage() {
           <div style={{ minWidth: 900 }}>
             {/* Timeline header */}
             <div style={{ display: 'flex', borderBottom: '2px solid var(--air-border-dark)', background: 'var(--air-secondary)', position: 'sticky', top: 0, zIndex: 20 }}>
-              <div style={{ width: 360, flexShrink: 0, padding: '10px 24px', borderRight: '1px solid var(--air-border-dark)' }}>
+              <div style={{ width: 'clamp(200px, 30vw, 360px)', flexShrink: 0, padding: '10px 16px', borderRight: '1px solid var(--air-border-dark)' }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--air-text-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>Task / Status</span>
               </div>
               <div style={{ flex: 1, position: 'relative', padding: '0 16px', height: 38, overflow: 'hidden' }}>
@@ -212,7 +212,7 @@ export function ProjectDetailPage() {
 
               return (
                 <div key={task.id} className="gantt-row anim-fade-up" style={{ animationDelay: `${idx * 50}ms`, background: isHov ? 'var(--air-row-hover)' : 'transparent' }} onMouseEnter={() => setHoveredRow(task.id)} onMouseLeave={() => setHoveredRow(null)}>
-                  <div style={{ width: 360, flexShrink: 0, padding: '10px 24px', borderRight: '1px solid var(--air-border)', display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{ width: 'clamp(200px, 30vw, 360px)', flexShrink: 0, padding: '10px 16px', borderRight: '1px solid var(--air-border)', display: 'flex', gap: 10, alignItems: 'center' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--air-text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</div>
                       <div style={{ fontSize: 11, color: 'var(--air-text-3)', marginTop: 3 }}>{format(new Date(task.startDate), 'MMM d')} – {format(new Date(task.endDate), 'MMM d, yyyy')}</div>
@@ -250,7 +250,7 @@ export function ProjectDetailPage() {
 function GanttSkeleton() {
   return (
     <div style={{ background: 'var(--air-bg)', minHeight: '100%' }}>
-      <div style={{ background: '#fff', borderBottom: '1px solid var(--air-border)', padding: '24px 40px' }}>
+      <div style={{ background: 'var(--air-surface)', borderBottom: '1px solid var(--air-border)', padding: '24px 40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
           <div className="skeleton-light" style={{ width: 40, height: 40, borderRadius: 11 }} />
           <div>
@@ -263,7 +263,7 @@ function GanttSkeleton() {
       <div style={{ padding: '0' }}>
         {[1,2,3,4].map((i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', height: 44, borderBottom: '1px solid var(--air-border)' }}>
-            <div style={{ width: 360, padding: '0 24px', display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ width: 'clamp(200px, 30vw, 360px)', padding: '0 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
               <div className="skeleton-light" style={{ flex: 1, height: 14 }} />
               <div className="skeleton-light" style={{ width: 70, height: 20, borderRadius: 999 }} />
             </div>

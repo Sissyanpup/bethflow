@@ -97,7 +97,7 @@ export function AuthLayout() {
 
       {/* ── Right panel: form ── */}
       <div style={{
-        background: '#fff',
+        background: 'var(--fig-surface)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '48px 40px',
         overflowY: 'auto',

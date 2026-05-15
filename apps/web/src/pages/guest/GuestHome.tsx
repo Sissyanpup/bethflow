@@ -138,7 +138,7 @@ export function GuestHomePage() {
               ))}
             </div>
           ) : searchResult?.data.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '56px 24px', background: '#fff', borderRadius: 20, border: '1px solid #f3f4f6' }}>
+            <div style={{ textAlign: 'center', padding: '56px 24px', background: 'var(--fig-surface)', borderRadius: 20, border: '1px solid rgba(124,58,237,0.08)' }}>
               <IconUser size={32} style={{ color: 'var(--fig-text-muted)', margin: '0 auto 12px', display: 'block' }} />
               <p style={{ color: 'var(--fig-text-meta)', fontSize: 16 }}>No users found matching &ldquo;{submitted}&rdquo;</p>
             </div>
@@ -214,8 +214,8 @@ function UserCard({ user, delay, onNavigate }: { user: SearchUser; delay: number
       onMouseLeave={() => setHov(false)}
       style={{
         animationDelay: `${delay}ms`,
-        background: '#fff', borderRadius: 18,
-        border: hov ? '1px solid rgba(124,58,237,0.2)' : '1px solid #f3f4f6',
+        background: 'var(--fig-surface)', borderRadius: 18,
+        border: hov ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(124,58,237,0.07)',
         boxShadow: hov ? '0 12px 40px rgba(124,58,237,0.12)' : '0 2px 12px rgba(0,0,0,0.06)',
         transform: hov ? 'translateY(-4px)' : 'translateY(0)',
         transition: 'all 0.22s var(--ease-out)',
@@ -271,7 +271,7 @@ function FeatureCard({ feature: f, delay }: { feature: typeof FEATURES[0]; delay
   const [hovered, setHovered] = useState(false);
   return (
     <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} className="anim-fade-up"
-      style={{ animationDelay: `${delay}ms`, background: '#fff', borderRadius: 18, border: hovered ? '1px solid rgba(124,58,237,0.2)' : '1px solid #f3f4f6', boxShadow: hovered ? '0 12px 40px rgba(124,58,237,0.14), 0 2px 8px rgba(0,0,0,0.05)' : '0 1px 4px rgba(0,0,0,0.06)', transform: hovered ? 'translateY(-5px)' : 'translateY(0)', overflow: 'hidden', transition: 'transform 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out), border-color 0.22s' }}>
+      style={{ animationDelay: `${delay}ms`, background: 'var(--fig-surface)', borderRadius: 18, border: hovered ? '1px solid rgba(124,58,237,0.2)' : '1px solid rgba(124,58,237,0.07)', boxShadow: hovered ? '0 12px 40px rgba(124,58,237,0.14), 0 2px 8px rgba(0,0,0,0.05)' : '0 1px 4px rgba(0,0,0,0.06)', transform: hovered ? 'translateY(-5px)' : 'translateY(0)', overflow: 'hidden', transition: 'transform 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out), border-color 0.22s' }}>
       <div style={{ height: 4, background: f.gradient }} />
       <div style={{ padding: 28 }}>
         <div style={{ width: 48, height: 48, borderRadius: 12, background: f.iconBg, marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.22s var(--ease-spring)', transform: hovered ? 'scale(1.1) rotate(-3deg)' : 'scale(1)' }}>

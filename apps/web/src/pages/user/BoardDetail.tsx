@@ -17,9 +17,18 @@ import {
 } from '../../components/ui/icons.js';
 import { CardModal } from '../../components/board/CardModal.js';
 
+type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'BLOCKED';
+const STATUS_DOT: Record<TaskStatus, string> = {
+  TODO:        '#8b5cf6',
+  IN_PROGRESS: '#3b82f6',
+  DONE:        '#22c55e',
+  BLOCKED:     '#ef4444',
+};
+
 interface Card {
   id: string; title: string; description: string | null;
   position: number; color: string | null; isArchived: boolean;
+  taskId: string | null; taskStatus: TaskStatus | null;
 }
 interface List { id: string; title: string; position: number; cards: Card[]; }
 interface BoardData { id: string; title: string; color: string | null; description: string | null; isPublic: boolean; lists: List[]; }
@@ -157,7 +166,7 @@ export function BoardDetailPage() {
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
           {/* Board header */}
-          <div style={{ padding: '18px 28px 16px', borderBottom: '1px solid var(--lin-border-1)', background: 'var(--lin-panel)', flexShrink: 0 }}>
+          <div className="board-header" style={{ padding: '14px 20px 12px', borderBottom: '1px solid var(--lin-border-1)', background: 'var(--lin-panel)', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 16px ${accentColor}50` }}>
                 <IconKanban size={18} style={{ color: '#fff' }} />
@@ -378,7 +387,12 @@ function SortableCard({ card, listId, listColor, delay, isDragging, onOpen }: {
           <IconGripVertical size={14} />
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 590, color: 'var(--lin-text-1)', lineHeight: 1.45, letterSpacing: '-0.1px' }}>{card.title}</div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 590, color: 'var(--lin-text-1)', lineHeight: 1.45, letterSpacing: '-0.1px', flex: 1 }}>{card.title}</div>
+            {card.taskStatus && (
+              <div title={card.taskStatus.replace('_', ' ')} style={{ width: 9, height: 9, borderRadius: '50%', background: STATUS_DOT[card.taskStatus], flexShrink: 0, marginTop: 4, boxShadow: `0 0 5px ${STATUS_DOT[card.taskStatus]}80` }} />
+            )}
+          </div>
           {card.description && (
             <div style={{ fontSize: 12, color: 'var(--lin-text-4)', marginTop: 5, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{card.description}</div>
           )}

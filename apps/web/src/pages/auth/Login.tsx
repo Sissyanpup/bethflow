@@ -129,9 +129,9 @@ export function LoginPage() {
 
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '28px 0' }}>
-        <div style={{ flex: 1, height: 1, background: '#f3f4f6' }} />
-        <span style={{ fontSize: 12, color: '#d1d5db', fontWeight: 500 }}>OR</span>
-        <div style={{ flex: 1, height: 1, background: '#f3f4f6' }} />
+        <div style={{ flex: 1, height: 1, background: 'rgba(156,163,175,0.2)' }} />
+        <span style={{ fontSize: 12, color: 'var(--fig-text-muted)', fontWeight: 500 }}>OR</span>
+        <div style={{ flex: 1, height: 1, background: 'rgba(156,163,175,0.2)' }} />
       </div>
 
       <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--fig-text-meta)' }}>

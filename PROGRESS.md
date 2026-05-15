@@ -1,4 +1,4 @@
-# Bethflow — Progress Snapshot (2026-05-15 rev6)
+# Bethflow — Progress Snapshot (2026-05-15 rev7)
 
 > Ringkasan status proyek untuk AI agent. Baca ini sebelum mulai bekerja.
 
@@ -13,7 +13,7 @@
 | Redis 7                  | ✅ Up + healthy                                                                 |
 | API (Express 5)          | ✅ Running `:4000`                                                              |
 | Web (React + Vite)       | ✅ Running `:5173`                                                              |
-| Prisma migration         | ✅ Applied (`20260514142956_add_board_ispublic`)                                |
+| Prisma migration         | ✅ Applied (`20260515000001_add_card_task_link`)                                |
 | DB seed                  | ✅ Done — admin + demo user + dummy data                                        |
 | Semua halaman            | ✅ Diverifikasi di browser (rev3)                                               |
 | Card Modal (Trello)      | ✅ Implemented (rev4)                                                           |
@@ -33,6 +33,12 @@
 | Dark/Light/System mode   | ✅ Implemented (rev6) — ThemeToggle di semua layout, persist localStorage      |
 | Responsive mobile        | ✅ Fixed (rev6) — drawer sidebar UserLayout/AdminLayout, mobile nav GuestLayout |
 | Root "/" redirect        | ✅ Fixed (rev6) — GuestLayout auth-aware: logged-in → Dashboard button         |
+| Dark mode bugs           | ✅ Fixed (rev7) — Catalogs/AuthLayout/GuestHome/GuestLayout/Login/ProjectDetail |
+| Board-Project integration| ✅ Implemented (rev7) — Card dates auto-link to Project task (find/create)      |
+| Status dots on Kanban    | ✅ Implemented (rev7) — Colored dot on card if linked task exists               |
+| CardModal task status    | ✅ Implemented (rev7) — TaskStatusPicker in sidebar when task is linked          |
+| Catalog status dots      | ✅ Implemented (rev7) — Status count badges on catalog cards                    |
+| Responsive Gantt mobile  | ✅ Fixed (rev7) — task name col: clamp(200px,30vw,360px)                       |
 
 ---
 
@@ -201,12 +207,12 @@ GET                 /health
 | RefreshToken  | -> User                                                                                     |
 | Board         | -> User (owner), lists[] · isPublic Boolean default(false) (rev5)                          |
 | List          | -> Board, cards[] · isArchived Boolean                                                      |
-| Card          | -> List, -> Catalog? · isArchived Boolean · color String? · checklist[], comments[]        |
+| Card          | -> List, -> Catalog?, -> Task? (taskId @unique) · isArchived · color · checklist[], comments[] |
 | ChecklistItem | -> Card, text, isChecked, position (rev4)                                                   |
 | CardComment   | -> Card, -> User, content (rev4)                                                            |
 | Catalog       | -> User (owner), cards[]                                                                    |
 | Project       | -> User (owner), tasks[]                                                                    |
-| Task          | -> Project, status: TaskStatus enum                                                         |
+| Task          | -> Project, status: TaskStatus enum · linkedCard Card? (back-rel)                           |
 | SocialLink    | -> User, platform, label, url, isVisible, position                                          |
 | Feedback      | -> User?                                                                                    |
 

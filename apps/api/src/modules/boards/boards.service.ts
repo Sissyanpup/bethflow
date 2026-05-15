@@ -17,13 +17,35 @@ export async function getBoard(id: string, userId: string) {
       lists: {
         where: { isArchived: false },
         orderBy: { position: 'asc' },
-        include: { cards: { where: { isArchived: false }, orderBy: { position: 'asc' } } },
+        include: {
+          cards: {
+            where: { isArchived: false },
+            orderBy: { position: 'asc' },
+            include: { linkedTask: { select: { status: true } } },
+          },
+        },
       },
     },
   });
   if (!board) throw Object.assign(new Error('Board not found'), { code: 'NOT_FOUND' });
   if (board.ownerId !== userId) throw Object.assign(new Error('Forbidden'), { code: 'FORBIDDEN' });
-  return board;
+  return {
+    ...board,
+    createdAt: board.createdAt.toISOString(),
+    updatedAt: board.updatedAt.toISOString(),
+    lists: board.lists.map((list) => ({
+      ...list,
+      cards: list.cards.map((card) => ({
+        ...card,
+        taskId: card.taskId ?? null,
+        taskStatus: card.linkedTask?.status ?? null,
+        startDate: card.startDate?.toISOString() ?? null,
+        endDate: card.endDate?.toISOString() ?? null,
+        createdAt: card.createdAt.toISOString(),
+        updatedAt: card.updatedAt.toISOString(),
+      })),
+    })),
+  };
 }
 
 export async function createBoard(ownerId: string, data: CreateBoardInput) {

@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 import { IconMenu, IconX, IconArrowRight } from '../../components/ui/icons.js';
 import { ThemeToggle } from '../../components/ui/ThemeToggle.js';
 import { useAuthStore } from '../../stores/auth.store.js';
+import { useThemeStore, resolveTheme } from '../../stores/theme.store.js';
 
 export function GuestLayout() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const user = useAuthStore((s) => s.user);
   const isLoggedIn = !!user;
+  const { mode } = useThemeStore();
+  const isDark = resolveTheme(mode) === 'dark';
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 12);
@@ -25,7 +28,7 @@ export function GuestLayout() {
       {/* Navbar */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: scrolled ? 'rgba(248,247,255,0.92)' : 'transparent',
+        background: scrolled ? (isDark ? 'rgba(13,13,20,0.92)' : 'rgba(248,247,255,0.92)') : 'transparent',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(16px)' : 'none',
         borderBottom: scrolled ? '1px solid rgba(124,58,237,0.08)' : '1px solid transparent',

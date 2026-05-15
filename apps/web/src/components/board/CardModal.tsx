@@ -4,7 +4,7 @@ import { api } from '../../lib/api.js';
 import {
   IconX, IconPencil, IconCheck, IconTrash, IconArchive, IconTag,
   IconMessageSquare, IconImage, IconCalendar, IconGrid, IconPlus,
-  IconRotateCcw, IconAlertCircle,
+  IconRotateCcw, IconAlertCircle, IconTarget,
 } from '../ui/icons.js';
 import { format } from 'date-fns';
 import type { CardDetail, ChecklistItem, CardComment } from '@bethflow/shared';
@@ -332,6 +332,14 @@ export function CardModal({ cardId, boardId, listColor, onClose, onDelete }: Pro
             </div>
           )}
 
+          {/* Task status — only shown when card is linked to a timeline task */}
+          {card.linkedTask && (
+            <>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--lin-text-4)', letterSpacing: 0.8, textTransform: 'uppercase', margin: '14px 0 6px' }}>Timeline Status</div>
+              <TaskStatusPicker taskId={card.linkedTask.id} currentStatus={card.linkedTask.status as 'TODO'|'IN_PROGRESS'|'DONE'|'BLOCKED'} onChanged={invalidate} />
+            </>
+          )}
+
           <SidebarBtn icon={<IconCheck size={13} />} label="Checklist" onClick={() => setAddingCheck(true)} />
 
           <SidebarBtn icon={<IconImage size={13} />} label="Attachment" onClick={() => { setShowMediaEdit(!showMediaEdit); setMediaUrlDraft(card.mediaUrl ?? ''); }} />
@@ -444,6 +452,58 @@ function ChecklistRow({ item, onToggle, onDelete }: { item: ChecklistItem; onTog
           <IconTrash size={12} />
         </button>
       )}
+    </div>
+  );
+}
+
+type TStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'BLOCKED';
+const STATUS_META_MODAL: { key: TStatus; label: string; color: string }[] = [
+  { key: 'TODO',        label: 'Todo',        color: '#8b5cf6' },
+  { key: 'IN_PROGRESS', label: 'In Progress', color: '#3b82f6' },
+  { key: 'DONE',        label: 'Done',        color: '#22c55e' },
+  { key: 'BLOCKED',     label: 'Blocked',     color: '#ef4444' },
+];
+
+function TaskStatusPicker({ taskId, currentStatus, onChanged }: { taskId: string; currentStatus: TStatus; onChanged: () => void }) {
+  const [pending, setPending] = useState(false);
+
+  const handleChange = async (status: TStatus) => {
+    if (status === currentStatus || pending) return;
+    setPending(true);
+    try {
+      await api.patch(`/tasks/${taskId}`, { status });
+      onChanged();
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingBottom: 4 }}>
+      {STATUS_META_MODAL.map(({ key, label, color }) => {
+        const active = currentStatus === key;
+        return (
+          <button
+            key={key}
+            onClick={() => void handleChange(key)}
+            disabled={pending}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 10px', borderRadius: 7,
+              background: active ? `${color}18` : 'transparent',
+              border: active ? `1px solid ${color}40` : '1px solid transparent',
+              color: active ? color : 'var(--lin-text-3)',
+              fontSize: 12, fontWeight: active ? 700 : 500,
+              cursor: 'pointer', transition: 'all 0.12s',
+            }}
+            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; }}
+            onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+            {label}
+            {active && <IconTarget size={11} style={{ marginLeft: 'auto', color }} />}
+          </button>
+        );
+      })}
     </div>
   );
 }

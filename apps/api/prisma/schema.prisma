@@ -93,10 +93,12 @@ model Card {
   isArchived  Boolean   @default(false)
   startDate   DateTime?
   endDate     DateTime?
+  taskId      String?   @unique
   listId      String
   list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
   catalogId   String?
   catalog     Catalog?  @relation(fields: [catalogId], references: [id])
+  linkedTask  Task?     @relation("CardLinkedTask", fields: [taskId], references: [id], onDelete: SetNull)
   checklist   ChecklistItem[]
   comments    CardComment[]
   createdAt   DateTime  @default(now())
@@ -171,6 +173,7 @@ model Task {
   position    Int
   projectId   String
   project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  linkedCard  Card?      @relation("CardLinkedTask")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

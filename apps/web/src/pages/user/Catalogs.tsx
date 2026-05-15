@@ -4,7 +4,15 @@ import { api } from '../../lib/api.js';
 import { format } from 'date-fns';
 import { IconPlus, IconX, IconGrid, IconCalendar, IconTrash } from '../../components/ui/icons.js';
 
-interface Catalog { id: string; title: string; content: string | null; startDate: string | null; endDate: string | null; }
+interface Catalog {
+  id: string; title: string; content: string | null;
+  startDate: string | null; endDate: string | null;
+  taskStatusCounts?: Record<string, number>;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  TODO: '#8b5cf6', IN_PROGRESS: '#3b82f6', DONE: '#22c55e', BLOCKED: '#ef4444',
+};
 
 const CATALOG_GRADIENTS = [
   { gradient: 'linear-gradient(135deg, #ef4444, #f97316)', glow: 'rgba(239,68,68,0.3)' },
@@ -68,7 +76,7 @@ export function CatalogsPage() {
       {/* Create form */}
       {showNew && (
         <div className="anim-scale-in" style={{
-          background: '#fff', border: '1px solid var(--air-border)',
+          background: 'var(--air-surface)', border: '1px solid var(--air-border)',
           borderRadius: 12, padding: '20px 22px', marginBottom: 24,
           boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
         }}>
@@ -97,7 +105,7 @@ export function CatalogsPage() {
             </button>
             <button
               onClick={() => setShowNew(false)}
-              style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--air-border-dark)', color: 'var(--air-text-3)', cursor: 'pointer', background: '#fff' }}>
+              style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--air-border-dark)', color: 'var(--air-text-3)', cursor: 'pointer', background: 'var(--air-secondary)' }}>
               <IconX size={16} />
             </button>
           </div>
@@ -138,8 +146,8 @@ function CatalogCard({ catalog, scheme, delay, onDelete }: { catalog: Catalog; s
       style={{
         animationDelay: `${delay}ms`,
         position: 'relative',
-        background: '#fff',
-        border: `1px solid ${hov ? '#e0e0e0' : 'var(--air-border)'}`,
+        background: 'var(--air-surface)',
+        border: `1px solid ${hov ? 'var(--air-border-dark)' : 'var(--air-border)'}`,
         borderRadius: 14, overflow: 'hidden', cursor: 'default',
         boxShadow: hov ? `0 8px 28px ${scheme.glow}, 0 2px 8px rgba(0,0,0,0.06)` : '0 1px 3px rgba(0,0,0,0.06)',
         transform: hov ? 'translateY(-4px)' : 'translateY(0)',
@@ -176,6 +184,21 @@ function CatalogCard({ catalog, scheme, delay, onDelete }: { catalog: Catalog; s
             <span style={{ background: 'var(--air-secondary)', borderRadius: 5, fontSize: 11, fontWeight: 600, color: 'var(--air-text-2)', padding: '2px 8px' }}>
               {catalog.startDate ? format(new Date(catalog.startDate), 'MMM d') : '?'} – {catalog.endDate ? format(new Date(catalog.endDate), 'MMM d') : '?'}
             </span>
+          </div>
+        )}
+        {catalog.taskStatusCounts && Object.keys(catalog.taskStatusCounts).length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+            {(['TODO','IN_PROGRESS','DONE','BLOCKED'] as const).map((st) => {
+              const count = catalog.taskStatusCounts![st];
+              if (!count) return null;
+              const color = STATUS_COLORS[st]!;
+              return (
+                <span key={st} title={`${st.replace('_',' ')}: ${count}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, color, background: `${color}18`, borderRadius: 999, padding: '2px 7px', border: `1px solid ${color}30` }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, display: 'inline-block' }} />
+                  {count}
+                </span>
+              );
+            })}
           </div>
         )}
       </div>
@@ -229,7 +252,7 @@ function EmptyCatalogs({ onNew }: { onNew: () => void }) {
   return (
     <div className="anim-fade-up" style={{
       textAlign: 'center', padding: '72px 24px',
-      background: '#fff', border: '1px dashed var(--air-border)', borderRadius: 16,
+      background: 'var(--air-surface)', border: '1px dashed var(--air-border)', borderRadius: 16,
     }}>
       <div style={{
         width: 56, height: 56, borderRadius: 14,
