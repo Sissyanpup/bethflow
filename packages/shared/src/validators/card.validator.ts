@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const CreateCardSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(2000).optional(),
-  mediaUrl: z.string().url().optional(),
+  mediaUrl: z.string().url().refine((val) => /^https?:\/\//i.test(val), { message: 'URL must use http or https' }).optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
   catalogId: z.string().cuid().optional(),

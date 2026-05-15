@@ -38,23 +38,22 @@ export async function sendOtp(req: Request, res: Response): Promise<void> {
   const { email } = req.body as { email: string };
   try {
     await authService.sendOtp(email);
-    res.json({ success: true, data: { message: 'OTP sent' } });
   } catch (err) {
     const e = err as Error & { code?: string };
     if (e.code === 'NOT_FOUND') {
-      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: e.message } });
-      return;
-    }
-    if (e.code === 'CONFLICT') {
+      // Intentionally swallowed: do not reveal whether this email is registered.
+    } else if (e.code === 'CONFLICT') {
       res.status(409).json({ success: false, error: { code: 'CONFLICT', message: e.message } });
       return;
-    }
-    if (e.code === 'TOO_MANY_REQUESTS') {
+    } else if (e.code === 'TOO_MANY_REQUESTS') {
       res.status(429).json({ success: false, error: { code: 'TOO_MANY_REQUESTS', message: e.message } });
       return;
+    } else {
+      throw err;
     }
-    throw err;
   }
+  // Same response whether the email exists or not — prevents user enumeration.
+  res.json({ success: true, data: { message: 'If that email is registered and unverified, a code was sent' } });
 }
 
 export async function verifyOtp(req: Request, res: Response): Promise<void> {

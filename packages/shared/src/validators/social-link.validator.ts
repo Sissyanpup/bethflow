@@ -9,7 +9,7 @@ const platformKeys = Object.keys(SOCIAL_PLATFORMS) as [
 export const CreateSocialLinkSchema = z.object({
   platform: z.enum(platformKeys),
   label: z.string().min(1).max(60),
-  url: z.string().url(),
+  url: z.string().url().refine((val) => /^https?:\/\//i.test(val), { message: 'URL must use http or https' }),
   iconSlug: z.string().max(60).nullable().optional(),
   isVisible: z.boolean().optional(),
 });
