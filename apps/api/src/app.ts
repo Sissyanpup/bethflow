@@ -91,9 +91,12 @@ async function start() {
   });
 }
 
-start().catch((err) => {
-  logger.error({ err }, 'Failed to start server');
-  process.exit(1);
-});
+// Vitest sets process.env.VITEST before importing test files; skip auto-start in tests.
+if (!process.env['VITEST']) {
+  start().catch((err) => {
+    logger.error({ err }, 'Failed to start server');
+    process.exit(1);
+  });
+}
 
 export { app };

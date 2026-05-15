@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from './router.js';
 import { applyTheme } from './stores/theme.store.js';
 import { useAuthStore } from './stores/auth.store.js';
+import { ErrorBoundary } from './components/ErrorBoundary.js';
 import './styles/globals.css';
 
 // Apply stored theme before first render to prevent flash of unstyled content
@@ -52,8 +53,10 @@ if (!rootEl) throw new Error('Root element not found');
 
 createRoot(rootEl).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AppRoot />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AppRoot />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

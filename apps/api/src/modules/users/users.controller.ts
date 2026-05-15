@@ -25,6 +25,19 @@ export async function updateMe(req: Request, res: Response): Promise<void> {
   res.json({ success: true, data: user });
 }
 
+export async function exportMe(req: Request, res: Response): Promise<void> {
+  const data = await usersService.exportUserData(req.user!.sub);
+  const filename = `bethflow-export-${data.profile.username}-${new Date().toISOString().slice(0, 10)}.json`;
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/json');
+  res.json({ success: true, data });
+}
+
+export async function deleteMe(req: Request, res: Response): Promise<void> {
+  await usersService.deleteUserAccount(req.user!.sub);
+  res.json({ success: true, data: { message: 'Account deactivated. Your data has been retained per our retention policy.' } });
+}
+
 export async function searchUsers(req: Request, res: Response): Promise<void> {
   const q = String(req.query['q'] ?? '');
   const page = Math.max(1, parseInt(String(req.query['page'] ?? '1'), 10));

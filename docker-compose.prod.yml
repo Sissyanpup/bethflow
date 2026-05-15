@@ -57,8 +57,12 @@ services:
       - api
     ports:
       - '80:80'
-      # Uncomment after adding SSL cert mount:
-      # - '443:443'
+      - '443:443'
+    # SSL certificate volumes — uncomment and set paths after running certbot:
+    #   certbot certonly --standalone -d yourdomain.com
+    # volumes:
+    #   - /etc/letsencrypt/live/yourdomain.com/fullchain.pem:/etc/ssl/certs/fullchain.pem:ro
+    #   - /etc/letsencrypt/live/yourdomain.com/privkey.pem:/etc/ssl/private/privkey.pem:ro
 
 volumes:
   postgres_data:

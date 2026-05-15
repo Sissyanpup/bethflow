@@ -29,6 +29,7 @@ import { SocialLinksPage } from './pages/user/SocialLinks.js';
 import { PublicProfilePage } from './pages/guest/PublicProfile.js';
 import { AdminDashboardPage } from './pages/admin/AdminDashboard.js';
 import { AdminUsersPage } from './pages/admin/AdminUsers.js';
+import { NotFoundPage } from './pages/NotFound.js';
 
 // Root
 const rootRoute = createRootRoute({ component: Outlet });
@@ -76,11 +77,14 @@ const adminLayoutRoute = createRoute({
 const adminDashboardRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/admin', component: AdminDashboardPage });
 const adminUsersRoute = createRoute({ getParentRoute: () => adminLayoutRoute, path: '/admin/users', component: AdminUsersPage });
 
+const notFoundRoute = createRoute({ getParentRoute: () => rootRoute, path: '*', component: NotFoundPage });
+
 const routeTree = rootRoute.addChildren([
   guestLayoutRoute.addChildren([homeRoute, contactRoute, publicProfileRoute]),
   authLayoutRoute.addChildren([loginRoute, registerRoute, verifyEmailRoute]),
   userLayoutRoute.addChildren([dashboardRoute, boardsRoute, boardDetailRoute, projectsRoute, projectDetailRoute, catalogsRoute, socialLinksRoute]),
   adminLayoutRoute.addChildren([adminDashboardRoute, adminUsersRoute]),
+  notFoundRoute,
 ]);
 
 export const router = createRouter({ routeTree });
