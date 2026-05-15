@@ -12,3 +12,7 @@
 - ✅ Logo login/regis bisa diklik → Link to="/"
 - ✅ ProjectDetail — edit task modal (judul, deskripsi, status, tanggal)
 - ✅ Catalogs — group system (DB migration + API + UI grouped view + edit modal)
+
+## Error Bug
+
+- ✅ Fixed (rev9) — Refresh loop saat restart docker. Root cause: axios interceptor memanggil `window.location.href = '/login'` dari dalam request `/auth/refresh` → infinite reload. Fix: skip interceptor retry jika request adalah refresh, dan guard StrictMode double-effect dengan `useRef`.

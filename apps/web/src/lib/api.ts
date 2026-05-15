@@ -20,13 +20,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-refresh on 401
+// Auto-refresh on 401 — skip retry if the failing request itself is a refresh call
 api.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
     if (!axios.isAxiosError(error)) throw error;
     const originalRequest = error.config;
-    if (error.response?.status === 401 && originalRequest && !(originalRequest as { _retry?: boolean })._retry) {
+    const isRefreshRequest = originalRequest?.url?.includes('/auth/refresh');
+
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !isRefreshRequest &&
+      !(originalRequest as { _retry?: boolean })._retry
+    ) {
       (originalRequest as { _retry?: boolean })._retry = true;
       try {
         const { data } = await axios.post<{ success: true; data: { accessToken: string } }>(
@@ -39,7 +46,10 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch {
         setAccessToken(null);
-        window.location.href = '/login';
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login' && currentPath !== '/register') {
+          window.location.href = '/login';
+        }
       }
     }
     throw error;

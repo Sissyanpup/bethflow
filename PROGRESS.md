@@ -1,4 +1,4 @@
-# Bethflow — Progress Snapshot (2026-05-15 rev8)
+# Bethflow — Progress Snapshot (2026-05-15 rev9)
 
 > Ringkasan status proyek untuk AI agent. Baca ini sebelum mulai bekerja.
 
@@ -44,6 +44,7 @@
 | ProjectDetail task modal | ✅ Implemented (rev8) — Edit task modal: title, description, status, dates      |
 | Task add form            | ✅ Enhanced (rev8) — Add task form now includes description + status selector    |
 | Catalogs group system    | ✅ Implemented (rev8) — group field (DB + API + UI): grouped view + edit modal  |
+| Auth refresh loop fix    | ✅ Fixed (rev9) — axios interceptor skip retry on /auth/refresh + useRef guard  |
 
 ---
 
@@ -279,6 +280,7 @@ IconSun, IconMoon, IconMonitor
 | DnD same-list reorder tidak bekerja                       | BoardDetail.tsx                               | Pakai arrayMove di handleDragEnd untuk reorder dalam list yang sama (rev5)                     |
 | DnD drop ke list kosong tidak bisa                        | BoardDetail.tsx                               | Tambah useDroppable di KanbanColumn; over.id fallback ke listId (rev5)                        |
 | isPublic tidak tersimpan via PATCH                        | board.validator.ts (packages/shared)          | Shared package harus di-rebuild setelah edit src/ (rev5)                                      |
+| Refresh loop saat restart docker                          | api.ts + main.tsx                             | Interceptor tidak skip retry pada /auth/refresh + useRef guard StrictMode (rev9)              |
 | CSP eval blocked di browser                               | security.middleware.ts                        | Helmet contentSecurityPolicy: false — API serve JSON bukan HTML (rev6)                         |
 | Login sering gagal (rate limit collapse)                  | rate-limit.middleware.ts, app.ts, vite.config | Redis store + initRateLimiters() setelah connectRedis() + key IP:email + max 20 (rev6)        |
 | Login error message tidak informatif                      | Login.tsx                                     | Bedakan 429 ("terlalu banyak percobaan") vs 401 ("salah password") vs error lain (rev6)       |
