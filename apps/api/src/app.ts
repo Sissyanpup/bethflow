@@ -3,6 +3,7 @@ import express from 'express';
 import { createServer } from 'http';
 import cookieParser from 'cookie-parser';
 
+import { validateEnv } from './lib/env.js';
 import { helmetMiddleware, corsMiddleware } from './middleware/security.middleware.js';
 import { apiRateLimit, initRateLimiters } from './middleware/rate-limit.middleware.js';
 import { authenticate } from './middleware/auth.middleware.js';
@@ -81,6 +82,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
 async function start() {
+  validateEnv();
   await connectRedis();
   initRateLimiters();
   initSocket(server);

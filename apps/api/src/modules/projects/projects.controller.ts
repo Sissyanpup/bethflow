@@ -17,7 +17,7 @@ export async function listProjects(req: Request, res: Response): Promise<void> {
 
 export async function getProject(req: Request, res: Response): Promise<void> {
   try {
-    const project = await projectsService.getProject(req.params['id']!, req.user!.sub);
+    const project = await projectsService.getProject((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: project });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
@@ -29,21 +29,21 @@ export async function createProject(req: Request, res: Response): Promise<void> 
 
 export async function updateProject(req: Request, res: Response): Promise<void> {
   try {
-    const project = await projectsService.updateProject(req.params['id']!, req.user!.sub, req.body as { title?: string; description?: string });
+    const project = await projectsService.updateProject((req.params['id'] as string), req.user!.sub, req.body as { title?: string; description?: string });
     res.json({ success: true, data: project });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
 
 export async function deleteProject(req: Request, res: Response): Promise<void> {
   try {
-    await projectsService.deleteProject(req.params['id']!, req.user!.sub);
+    await projectsService.deleteProject((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: null });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
 
 export async function createTask(req: Request, res: Response): Promise<void> {
   try {
-    const task = await projectsService.createTask(req.params['id']!, req.user!.sub, req.body as Parameters<typeof projectsService.createTask>[2]);
+    const task = await projectsService.createTask((req.params['id'] as string), req.user!.sub, req.body as Parameters<typeof projectsService.createTask>[2]);
     res.status(201).json({ success: true, data: task });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }

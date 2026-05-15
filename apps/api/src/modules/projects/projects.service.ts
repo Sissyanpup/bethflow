@@ -21,13 +21,25 @@ export async function getProject(id: string, ownerId: string) {
 }
 
 export async function createProject(ownerId: string, data: CreateProjectInput) {
-  const project = await prisma.project.create({ data: { ...data, ownerId } });
+  const project = await prisma.project.create({
+    data: {
+      title: data.title,
+      ...(data.description !== undefined && { description: data.description }),
+      ownerId,
+    },
+  });
   return serializeProject(project);
 }
 
 export async function updateProject(id: string, ownerId: string, data: UpdateProjectInput) {
   await assertOwner(id, ownerId);
-  const project = await prisma.project.update({ where: { id }, data });
+  const project = await prisma.project.update({
+    where: { id },
+    data: {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.description !== undefined && { description: data.description }),
+    },
+  });
   return serializeProject(project);
 }
 
@@ -43,11 +55,13 @@ export async function createTask(projectId: string, ownerId: string, data: Creat
   const position = (maxPos._max.position ?? -1) + 1;
   return prisma.task.create({
     data: {
-      ...data,
-      projectId,
-      position,
+      title: data.title,
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.status !== undefined && { status: data.status }),
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
+      projectId,
+      position,
     },
   });
 }
@@ -57,9 +71,11 @@ export async function updateTask(id: string, ownerId: string, data: UpdateTaskIn
   return prisma.task.update({
     where: { id },
     data: {
-      ...data,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.status !== undefined && { status: data.status }),
+      ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
+      ...(data.endDate !== undefined && { endDate: new Date(data.endDate) }),
     },
   });
 }

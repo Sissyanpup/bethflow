@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useAuthStore } from '../../stores/auth.store.js';
 import { api } from '../../lib/api.js';
 import { IconEye, IconEyeOff, IconMail, IconUser } from '../../components/ui/icons.js';
 
@@ -9,7 +8,6 @@ export function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const login = useAuthStore((s) => s.login);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,11 +15,23 @@ export function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/register', form);
-      await login(form.email, form.password);
-      void navigate({ to: '/dashboard' });
-    } catch {
-      setError('Registration failed. Email or username may already be taken.');
+      const res = await api.post<{ success: boolean; data: { email: string; pendingVerification: boolean } }>(
+        '/auth/register',
+        form,
+      );
+      if (res.data.success && res.data.data.pendingVerification) {
+        void navigate({
+          to: '/verify-email',
+          search: { email: res.data.data.email },
+        });
+      }
+    } catch (err: unknown) {
+      const axErr = err as { response?: { status?: number; data?: { error?: { message?: string } } } };
+      if (axErr.response?.status === 409) {
+        setError('Email atau username sudah digunakan.');
+      } else {
+        setError('Registrasi gagal. Silakan coba lagi.');
+      }
     } finally {
       setLoading(false);
     }
@@ -33,14 +43,14 @@ export function RegisterPage() {
   return (
     <>
       <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--fig-text-h)', marginBottom: 6, letterSpacing: '-0.6px' }}>
-        Create your account
+        Buat akun baru
       </h1>
       <p style={{ color: 'var(--fig-text-meta)', marginBottom: 32, fontSize: 15 }}>
-        Join Bethflow today — free forever.
+        Bergabung dengan Bethflow — gratis selamanya.
       </p>
 
       {error && (
-        <div className="anim-fade-down toast-error" style={{ borderRadius: 10, marginBottom: 20, padding: '12px 16px', fontSize: 14 }}>
+        <div className="anim-fade-down toast-error" style={{ borderRadius: 10, marginBottom: 20, padding: '12px 16px', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" style={{ flexShrink: 0 }}>
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
@@ -88,7 +98,7 @@ export function RegisterPage() {
         {/* Display name */}
         <div>
           <label htmlFor="reg-displayname" style={{ fontSize: 13, fontWeight: 600, color: 'var(--fig-text-body)', display: 'block', marginBottom: 7 }}>
-            Display name <span style={{ color: '#9ca3af', fontWeight: 400 }}>(optional)</span>
+            Display name <span style={{ color: '#9ca3af', fontWeight: 400 }}>(opsional)</span>
           </label>
           <input
             id="reg-displayname"
@@ -108,7 +118,7 @@ export function RegisterPage() {
               id="reg-password"
               type={showPass ? 'text' : 'password'}
               value={form.password} onChange={set('password')}
-              required autoComplete="new-password" placeholder="Min. 8 characters"
+              required autoComplete="new-password" placeholder="Min. 8 karakter, 1 huruf besar, 1 angka"
               className="input" style={{ paddingRight: 44 }}
             />
             <button
@@ -133,28 +143,28 @@ export function RegisterPage() {
           className="btn btn-gradient btn-lg"
           style={{ width: '100%', marginTop: 8, justifyContent: 'center' }}>
           {loading
-            ? <><span className="spinner" style={{ width: 17, height: 17 }} /> Creating account…</>
-            : 'Create account'}
+            ? <><span className="spinner" style={{ width: 17, height: 17 }} /> Membuat akun…</>
+            : 'Buat akun'}
         </button>
       </form>
 
       <p style={{ textAlign: 'center', marginTop: 24, fontSize: 13, color: 'var(--fig-text-muted)', lineHeight: 1.6 }}>
-        By creating an account you agree to our{' '}
-        <Link to="/" style={{ color: 'var(--fig-purple)', fontWeight: 600 }}>Terms</Link>
-        {' '}and{' '}
-        <Link to="/" style={{ color: 'var(--fig-purple)', fontWeight: 600 }}>Privacy Policy</Link>.
+        Dengan mendaftar Anda menyetujui{' '}
+        <Link to="/" style={{ color: 'var(--fig-purple)', fontWeight: 600 }}>Syarat</Link>
+        {' '}dan{' '}
+        <Link to="/" style={{ color: 'var(--fig-purple)', fontWeight: 600 }}>Kebijakan Privasi</Link>.
       </p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
         <div style={{ flex: 1, height: 1, background: '#f3f4f6' }} />
-        <span style={{ fontSize: 12, color: '#d1d5db', fontWeight: 500 }}>OR</span>
+        <span style={{ fontSize: 12, color: '#d1d5db', fontWeight: 500 }}>ATAU</span>
         <div style={{ flex: 1, height: 1, background: '#f3f4f6' }} />
       </div>
 
       <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--fig-text-meta)' }}>
-        Already have an account?{' '}
+        Sudah punya akun?{' '}
         <Link to="/login" style={{ color: 'var(--fig-purple)', fontWeight: 700 }}>
-          Log in
+          Masuk
         </Link>
       </p>
     </>

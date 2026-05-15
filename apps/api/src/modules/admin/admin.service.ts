@@ -38,7 +38,14 @@ export async function adminGetStats() {
 }
 
 export async function adminUpdateUser(id: string, data: { role?: string; isActive?: boolean; isVerified?: boolean }) {
-  const user = await prisma.user.update({ where: { id }, data });
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      ...(data.role !== undefined && { role: data.role as Role }),
+      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(data.isVerified !== undefined && { isVerified: data.isVerified }),
+    },
+  });
   return { id: user.id, email: user.email, username: user.username, role: user.role, isActive: user.isActive, isVerified: user.isVerified };
 }
 

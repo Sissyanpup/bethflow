@@ -26,5 +26,16 @@ export const RefreshSchema = z.object({
   // this schema is kept for documentation purposes
 });
 
+export const SendOtpSchema = z.object({
+  email: z.string().email(),
+});
+
+export const VerifyOtpSchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6).regex(/^\d{6}$/, 'Code must be 6 digits'),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
+export type SendOtpInput = z.infer<typeof SendOtpSchema>;
+export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;

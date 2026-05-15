@@ -45,6 +45,12 @@
 | Task add form            | ✅ Enhanced (rev8) — Add task form now includes description + status selector    |
 | Catalogs group system    | ✅ Implemented (rev8) — group field (DB + API + UI): grouped view + edit modal  |
 | Auth refresh loop fix    | ✅ Fixed (rev9) — axios interceptor skip retry on /auth/refresh + useRef guard  |
+| Email OTP verification   | ✅ Implemented (rev10) — register→OTP email→verify-otp→auto-login; Ethereal dev preview in logs |
+| Login enforce isVerified | ✅ Fixed (rev11) — loginUser() cek isVerified → 403 EMAIL_NOT_VERIFIED → frontend redirect /verify-email |
+| OTP brute force guard    | ✅ Fixed (rev11) — otpRateLimit: 5 attempt/10 menit (terpisah dari authRateLimit 20/15min) |
+| XSS card/checklist/cmnt  | ✅ Fixed (rev11) — sanitizeHtml (plain text) di cards.service.ts: title, desc, checklist, comment |
+| Infrastruktur produksi   | ✅ Fixed (rev11) — docker-compose.prod.yml, env validation, nginx security headers, .env.production.example |
+| TypeScript 0 errors      | ✅ Fixed (rev11) — semua 17 file: req.params as string, exactOptionalPropertyTypes Prisma spreads |
 
 ---
 
@@ -324,7 +330,7 @@ useParams({ from: '/u/$username/links' })              // runtime crash
 | ProjectDetail.tsx           | Fungsional   | Timeline Gantt + task list berjalan; header responsive (rev6); gantt area belum full-mobile   |
 | BoardDetail.tsx mobile      | Perlu fix    | Kanban board sudah horizontal-scroll, tapi header padding bisa lebih responsif di HP kecil    |
 | Swagger/OpenAPI docs        | Belum        | Route /api/docs disebut di CLAUDE.md tapi belum dibuat                                        |
-| Email verification          | Belum        | Phase 2, optional                                                                              |
+| Email verification          | ✅ Selesai   | OTP 6-digit via Ethereal dev / SMTP prod — rev10                                               |
 | GET /api/me/export (GDPR)   | Belum        |                                                                                                |
 | DELETE /api/me (GDPR)       | Belum        |                                                                                                |
 | Rate limit                  | OK (rev6)    | Batas login 20x/15min per IP:email, Redis-backed. Reset: redis-cli FLUSHDB                   |

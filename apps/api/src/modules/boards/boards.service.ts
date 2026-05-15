@@ -49,13 +49,28 @@ export async function getBoard(id: string, userId: string) {
 }
 
 export async function createBoard(ownerId: string, data: CreateBoardInput) {
-  const board = await prisma.board.create({ data: { ...data, ownerId } });
+  const board = await prisma.board.create({
+    data: {
+      title: data.title,
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.color !== undefined && { color: data.color }),
+      ownerId,
+    },
+  });
   return serializeBoard(board);
 }
 
 export async function updateBoard(id: string, userId: string, data: UpdateBoardInput) {
   await assertOwner(id, userId);
-  const board = await prisma.board.update({ where: { id }, data });
+  const board = await prisma.board.update({
+    where: { id },
+    data: {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.color !== undefined && { color: data.color }),
+      ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
+    },
+  });
   return serializeBoard(board);
 }
 
@@ -74,7 +89,14 @@ export async function createList(boardId: string, userId: string, data: CreateLi
 
 export async function updateList(id: string, userId: string, data: UpdateListInput) {
   await assertListOwner(id, userId);
-  return prisma.list.update({ where: { id }, data });
+  return prisma.list.update({
+    where: { id },
+    data: {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.position !== undefined && { position: data.position }),
+      ...(data.isArchived !== undefined && { isArchived: data.isArchived }),
+    },
+  });
 }
 
 export async function deleteList(id: string, userId: string) {

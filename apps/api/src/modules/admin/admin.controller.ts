@@ -15,12 +15,12 @@ export async function getStats(_req: Request, res: Response): Promise<void> {
 }
 
 export async function updateUser(req: Request, res: Response): Promise<void> {
-  const user = await adminService.adminUpdateUser(req.params['id']!, req.body as { role?: string; isActive?: boolean; isVerified?: boolean });
+  const user = await adminService.adminUpdateUser((req.params['id'] as string), req.body as { role?: string; isActive?: boolean; isVerified?: boolean });
   res.json({ success: true, data: user });
 }
 
 export async function softDeleteUser(req: Request, res: Response): Promise<void> {
-  await adminService.adminSoftDeleteUser(req.params['id']!);
+  await adminService.adminSoftDeleteUser((req.params['id'] as string));
   res.json({ success: true, data: null });
 }
 

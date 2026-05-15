@@ -23,7 +23,7 @@ export async function listBoards(req: Request, res: Response): Promise<void> {
 
 export async function getBoard(req: Request, res: Response): Promise<void> {
   try {
-    const board = await boardsService.getBoard(req.params['id']!, req.user!.sub);
+    const board = await boardsService.getBoard((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: board });
   } catch (err) {
     if (!handleServiceError(err, res)) throw err;
@@ -37,7 +37,7 @@ export async function createBoard(req: Request, res: Response): Promise<void> {
 
 export async function updateBoard(req: Request, res: Response): Promise<void> {
   try {
-    const board = await boardsService.updateBoard(req.params['id']!, req.user!.sub, req.body as { title?: string; description?: string; color?: string; isPublic?: boolean });
+    const board = await boardsService.updateBoard((req.params['id'] as string), req.user!.sub, req.body as { title?: string; description?: string; color?: string; isPublic?: boolean });
     res.json({ success: true, data: board });
   } catch (err) {
     if (!handleServiceError(err, res)) throw err;
@@ -46,7 +46,7 @@ export async function updateBoard(req: Request, res: Response): Promise<void> {
 
 export async function deleteBoard(req: Request, res: Response): Promise<void> {
   try {
-    await boardsService.deleteBoard(req.params['id']!, req.user!.sub);
+    await boardsService.deleteBoard((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: null });
   } catch (err) {
     if (!handleServiceError(err, res)) throw err;

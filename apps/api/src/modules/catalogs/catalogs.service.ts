@@ -38,11 +38,13 @@ export async function getCatalog(id: string, ownerId: string) {
 export async function createCatalog(ownerId: string, data: CreateCatalogInput) {
   const catalog = await prisma.catalog.create({
     data: {
-      ...data,
+      title: data.title,
+      ...(data.content !== undefined && { content: sanitizeHtml(data.content) }),
+      ...(data.mediaUrl !== undefined && { mediaUrl: data.mediaUrl }),
+      ...(data.group !== undefined && { group: data.group }),
+      ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
+      ...(data.endDate !== undefined && { endDate: new Date(data.endDate) }),
       ownerId,
-      content: data.content ? sanitizeHtml(data.content) : undefined,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
     },
   });
   return serialize(catalog);
@@ -53,10 +55,12 @@ export async function updateCatalog(id: string, ownerId: string, data: UpdateCat
   const catalog = await prisma.catalog.update({
     where: { id },
     data: {
-      ...data,
-      content: data.content ? sanitizeHtml(data.content) : undefined,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.content !== undefined && { content: sanitizeHtml(data.content) }),
+      ...(data.mediaUrl !== undefined && { mediaUrl: data.mediaUrl }),
+      ...(data.group !== undefined && { group: data.group }),
+      ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
+      ...(data.endDate !== undefined && { endDate: new Date(data.endDate) }),
     },
   });
   return serialize(catalog);

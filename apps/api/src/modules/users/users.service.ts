@@ -17,12 +17,14 @@ export async function updateUser(
   id: string,
   data: { displayName?: string; bio?: string; avatarUrl?: string },
 ) {
-  const sanitized = {
-    displayName: data.displayName,
-    bio: data.bio ? sanitizeHtml(data.bio, { allowedTags: [], allowedAttributes: {} }) : undefined,
-    avatarUrl: data.avatarUrl,
-  };
-  const user = await prisma.user.update({ where: { id }, data: sanitized });
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      ...(data.displayName !== undefined && { displayName: data.displayName }),
+      ...(data.bio !== undefined && { bio: sanitizeHtml(data.bio, { allowedTags: [], allowedAttributes: {} }) }),
+      ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+    },
+  });
   return sanitizeUser(user);
 }
 

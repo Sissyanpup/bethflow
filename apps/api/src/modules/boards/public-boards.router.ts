@@ -5,7 +5,7 @@ export const publicBoardsRouter = Router();
 
 publicBoardsRouter.get('/:username/boards', async (req: Request, res: Response) => {
   try {
-    const boards = await getPublicBoards(req.params.username!);
+    const boards = await getPublicBoards(req.params['username'] as string);
     res.json({ success: true, data: boards });
   } catch (err: unknown) {
     const code = (err as { code?: string }).code;

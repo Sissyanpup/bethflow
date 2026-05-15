@@ -10,7 +10,7 @@ function handleServiceError(err: unknown, res: Response): boolean {
 
 export async function getPublicLinks(req: Request, res: Response): Promise<void> {
   try {
-    const data = await service.getPublicLinks(req.params['username']!);
+    const data = await service.getPublicLinks((req.params['username'] as string));
     res.json({ success: true, data });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
@@ -27,14 +27,14 @@ export async function createLink(req: Request, res: Response): Promise<void> {
 
 export async function updateLink(req: Request, res: Response): Promise<void> {
   try {
-    const link = await service.updateLink(req.params['id']!, req.user!.sub, req.body as Parameters<typeof service.updateLink>[2]);
+    const link = await service.updateLink((req.params['id'] as string), req.user!.sub, req.body as Parameters<typeof service.updateLink>[2]);
     res.json({ success: true, data: link });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
 
 export async function deleteLink(req: Request, res: Response): Promise<void> {
   try {
-    await service.deleteLink(req.params['id']!, req.user!.sub);
+    await service.deleteLink((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: null });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }

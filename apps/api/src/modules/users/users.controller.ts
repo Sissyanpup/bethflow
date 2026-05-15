@@ -8,7 +8,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
 
 export async function getUserById(req: Request, res: Response): Promise<void> {
   try {
-    const user = await usersService.getUserById(req.params['id']!);
+    const user = await usersService.getUserById((req.params['id'] as string));
     res.json({ success: true, data: user });
   } catch (err) {
     const e = err as Error & { code?: string };

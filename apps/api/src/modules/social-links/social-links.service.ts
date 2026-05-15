@@ -31,12 +31,31 @@ export async function getMyLinks(userId: string) {
 export async function createLink(userId: string, data: CreateSocialLinkInput) {
   const maxPos = await prisma.socialLink.aggregate({ where: { userId }, _max: { position: true } });
   const position = (maxPos._max.position ?? -1) + 1;
-  return prisma.socialLink.create({ data: { ...data, userId, position } });
+  return prisma.socialLink.create({
+    data: {
+      platform: data.platform,
+      label: data.label,
+      url: data.url,
+      ...(data.iconSlug !== undefined && { iconSlug: data.iconSlug }),
+      ...(data.isVisible !== undefined && { isVisible: data.isVisible }),
+      userId,
+      position,
+    },
+  });
 }
 
 export async function updateLink(id: string, userId: string, data: UpdateSocialLinkInput) {
   await assertOwner(id, userId);
-  return prisma.socialLink.update({ where: { id }, data });
+  return prisma.socialLink.update({
+    where: { id },
+    data: {
+      ...(data.platform !== undefined && { platform: data.platform }),
+      ...(data.label !== undefined && { label: data.label }),
+      ...(data.url !== undefined && { url: data.url }),
+      ...(data.iconSlug !== undefined && { iconSlug: data.iconSlug }),
+      ...(data.isVisible !== undefined && { isVisible: data.isVisible }),
+    },
+  });
 }
 
 export async function deleteLink(id: string, userId: string) {

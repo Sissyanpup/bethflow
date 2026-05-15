@@ -10,14 +10,14 @@ function handleServiceError(err: unknown, res: Response): boolean {
 
 export async function updateTask(req: Request, res: Response): Promise<void> {
   try {
-    const task = await projectsService.updateTask(req.params['id']!, req.user!.sub, req.body as Parameters<typeof projectsService.updateTask>[2]);
+    const task = await projectsService.updateTask((req.params['id'] as string), req.user!.sub, req.body as Parameters<typeof projectsService.updateTask>[2]);
     res.json({ success: true, data: task });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
 
 export async function deleteTask(req: Request, res: Response): Promise<void> {
   try {
-    await projectsService.deleteTask(req.params['id']!, req.user!.sub);
+    await projectsService.deleteTask((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: null });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }

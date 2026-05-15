@@ -16,7 +16,7 @@ function handleServiceError(err: unknown, res: Response): boolean {
 
 export async function createList(req: Request, res: Response): Promise<void> {
   try {
-    const list = await boardsService.createList(req.params['id']!, req.user!.sub, req.body as { title: string });
+    const list = await boardsService.createList((req.params['id'] as string), req.user!.sub, req.body as { title: string });
     res.status(201).json({ success: true, data: list });
   } catch (err) {
     if (!handleServiceError(err, res)) throw err;
@@ -25,7 +25,7 @@ export async function createList(req: Request, res: Response): Promise<void> {
 
 export async function updateList(req: Request, res: Response): Promise<void> {
   try {
-    const list = await boardsService.updateList(req.params['id']!, req.user!.sub, req.body as { title?: string; position?: number });
+    const list = await boardsService.updateList((req.params['id'] as string), req.user!.sub, req.body as { title?: string; position?: number });
     res.json({ success: true, data: list });
   } catch (err) {
     if (!handleServiceError(err, res)) throw err;
@@ -34,7 +34,7 @@ export async function updateList(req: Request, res: Response): Promise<void> {
 
 export async function deleteList(req: Request, res: Response): Promise<void> {
   try {
-    await boardsService.deleteList(req.params['id']!, req.user!.sub);
+    await boardsService.deleteList((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: null });
   } catch (err) {
     if (!handleServiceError(err, res)) throw err;

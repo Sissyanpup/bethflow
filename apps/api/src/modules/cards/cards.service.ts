@@ -1,9 +1,14 @@
+import sanitizeHtml from 'sanitize-html';
 import { prisma } from '../../lib/prisma.js';
 import { emitBoardEvent } from '../../lib/socket.js';
 import type {
   CreateCardInput, UpdateCardInput, ReorderCardsInput,
   CreateChecklistItemInput, UpdateChecklistItemInput, CreateCardCommentInput,
 } from '@bethflow/shared';
+
+import type { IOptions } from 'sanitize-html';
+const PLAIN_TEXT: IOptions = { allowedTags: [], allowedAttributes: {} };
+const strip = (s: string) => sanitizeHtml(s, PLAIN_TEXT);
 
 async function getBoardIdForList(listId: string): Promise<string> {
   const list = await prisma.list.findUnique({ where: { id: listId }, include: { board: true } });
@@ -64,11 +69,14 @@ export async function createCard(listId: string, userId: string, data: CreateCar
 
   const card = await prisma.card.create({
     data: {
-      ...data,
+      title: strip(data.title),
+      ...(data.description !== undefined && { description: strip(data.description) }),
+      ...(data.mediaUrl !== undefined && { mediaUrl: data.mediaUrl }),
+      ...(data.catalogId !== undefined && { catalogId: data.catalogId }),
+      ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
+      ...(data.endDate !== undefined && { endDate: new Date(data.endDate) }),
       listId,
       position,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
     },
   });
 
@@ -81,9 +89,16 @@ export async function updateCard(id: string, userId: string, data: UpdateCardInp
   const card = await prisma.card.update({
     where: { id },
     data: {
-      ...data,
-      startDate: data.startDate !== undefined ? (data.startDate ? new Date(data.startDate) : null) : undefined,
-      endDate: data.endDate !== undefined ? (data.endDate ? new Date(data.endDate) : null) : undefined,
+      ...(data.title !== undefined && { title: strip(data.title) }),
+      ...(data.description !== undefined && { description: data.description ? strip(data.description) : null }),
+      ...(data.mediaUrl !== undefined && { mediaUrl: data.mediaUrl }),
+      ...(data.catalogId !== undefined && { catalogId: data.catalogId }),
+      ...(data.startDate !== undefined && { startDate: data.startDate ? new Date(data.startDate) : null }),
+      ...(data.endDate !== undefined && { endDate: data.endDate ? new Date(data.endDate) : null }),
+      ...(data.position !== undefined && { position: data.position }),
+      ...(data.listId !== undefined && { listId: data.listId }),
+      ...(data.isArchived !== undefined && { isArchived: data.isArchived }),
+      ...(data.color !== undefined && { color: data.color }),
     },
     include: { list: true, linkedTask: { select: { id: true, status: true } } },
   });
@@ -175,13 +190,19 @@ export async function createChecklistItem(cardId: string, userId: string, data: 
   await assertCardOwner(cardId, userId);
   const maxPos = await prisma.checklistItem.aggregate({ where: { cardId }, _max: { position: true } });
   const position = (maxPos._max.position ?? -1) + 1;
-  const item = await prisma.checklistItem.create({ data: { cardId, text: data.text, position } });
+  const item = await prisma.checklistItem.create({ data: { cardId, text: strip(data.text), position } });
   return { ...item, createdAt: item.createdAt.toISOString() };
 }
 
 export async function updateChecklistItem(cardId: string, itemId: string, userId: string, data: UpdateChecklistItemInput) {
   await assertCardOwner(cardId, userId);
-  const item = await prisma.checklistItem.update({ where: { id: itemId }, data });
+  const item = await prisma.checklistItem.update({
+    where: { id: itemId },
+    data: {
+      ...(data.text !== undefined && { text: strip(data.text) }),
+      ...(data.isChecked !== undefined && { isChecked: data.isChecked }),
+    },
+  });
   return { ...item, createdAt: item.createdAt.toISOString() };
 }
 
@@ -194,7 +215,7 @@ export async function deleteChecklistItem(cardId: string, itemId: string, userId
 export async function createComment(cardId: string, userId: string, data: CreateCardCommentInput) {
   await assertCardOwner(cardId, userId);
   const comment = await prisma.cardComment.create({
-    data: { cardId, userId, content: data.content },
+    data: { cardId, userId, content: strip(data.content) },
     include: { user: { select: { username: true, displayName: true, avatarUrl: true } } },
   });
   return { ...comment, createdAt: comment.createdAt.toISOString(), updatedAt: comment.updatedAt.toISOString() };

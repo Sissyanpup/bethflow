@@ -17,7 +17,7 @@ export async function listCatalogs(req: Request, res: Response): Promise<void> {
 
 export async function getCatalog(req: Request, res: Response): Promise<void> {
   try {
-    const catalog = await catalogsService.getCatalog(req.params['id']!, req.user!.sub);
+    const catalog = await catalogsService.getCatalog((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: catalog });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
@@ -29,14 +29,14 @@ export async function createCatalog(req: Request, res: Response): Promise<void> 
 
 export async function updateCatalog(req: Request, res: Response): Promise<void> {
   try {
-    const catalog = await catalogsService.updateCatalog(req.params['id']!, req.user!.sub, req.body as Parameters<typeof catalogsService.updateCatalog>[2]);
+    const catalog = await catalogsService.updateCatalog((req.params['id'] as string), req.user!.sub, req.body as Parameters<typeof catalogsService.updateCatalog>[2]);
     res.json({ success: true, data: catalog });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }
 
 export async function deleteCatalog(req: Request, res: Response): Promise<void> {
   try {
-    await catalogsService.deleteCatalog(req.params['id']!, req.user!.sub);
+    await catalogsService.deleteCatalog((req.params['id'] as string), req.user!.sub);
     res.json({ success: true, data: null });
   } catch (err) { if (!handleServiceError(err, res)) throw err; }
 }

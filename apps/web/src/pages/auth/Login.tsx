@@ -24,7 +24,11 @@ export function LoginPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
-        if (status === 429) {
+        const code = (err.response?.data as { error?: { code?: string } } | undefined)?.error?.code;
+        if (status === 403 && code === 'EMAIL_NOT_VERIFIED') {
+          void navigate({ to: '/verify-email', search: { email } });
+          return;
+        } else if (status === 429) {
           setError('Too many login attempts. Please wait 15 minutes and try again.');
         } else if (status === 401) {
           setError('Invalid email or password. Please try again.');

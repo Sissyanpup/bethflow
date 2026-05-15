@@ -8,6 +8,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  setSession: (user: UserPublic, accessToken: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -21,6 +22,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     );
     setAccessToken(res.data.data.accessToken);
     set({ user: res.data.data.user });
+  },
+
+  setSession: (user, accessToken) => {
+    setAccessToken(accessToken);
+    set({ user });
   },
 
   logout: async () => {
