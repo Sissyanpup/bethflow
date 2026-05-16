@@ -47,6 +47,7 @@ export function BoardDetailPage() {
   const [showEditBoard, setShowEditBoard] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const dragSourceRef = useRef<string | null>(null);
 
   const { data: board, isLoading } = useQuery({
     queryKey: ['board', boardId],
@@ -101,7 +102,10 @@ export function BoardDetailPage() {
     const listId = e.active.data.current?.listId as string;
     const list = lists.find((l) => l.id === listId);
     const card = list?.cards.find((c) => c.id === e.active.id);
-    if (card && listId) setActiveCard({ ...card, listId });
+    if (card && listId) {
+      setActiveCard({ ...card, listId });
+      dragSourceRef.current = listId;
+    }
   }, [lists]);
 
   const handleDragOver = useCallback((e: DragOverEvent) => {
@@ -135,7 +139,8 @@ export function BoardDetailPage() {
     setActiveCard(null);
     if (!over || !activeCard) return;
 
-    const fromListId = activeCard.listId;
+    const fromListId = dragSourceRef.current ?? activeCard.listId;
+    dragSourceRef.current = null;
     const toListId = (over.data.current?.listId ?? over.id) as string;
 
     if (fromListId === toListId) {

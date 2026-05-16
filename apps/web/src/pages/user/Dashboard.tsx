@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from '../../lib/api.js';
 import { useAuthStore } from '../../stores/auth.store.js';
-import { IconKanban, IconCalendar, IconGrid, IconLink, IconArrowRight, IconChevronRight } from '../../components/ui/icons.js';
+import { IconKanban, IconCalendar, IconGrid, IconLink, IconArrowRight, IconChevronRight, IconDownload } from '../../components/ui/icons.js';
+import { ExportModal } from '../../components/board/ExportModal.js';
 
 export function UserDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const [showExport, setShowExport] = useState(false);
 
   const { data: boards, isLoading: bLoading } = useQuery({
     queryKey: ['boards'],
@@ -52,20 +54,32 @@ export function UserDashboardPage() {
   return (
     <div className="page-content" style={{ color: 'var(--lin-text-1)', minHeight: '100%' }}>
       {/* Header */}
-      <div className="anim-fade-up" style={{ marginBottom: 40 }}>
-        <div style={{ fontSize: 13, color: 'var(--lin-text-4)', fontWeight: 500, marginBottom: 6 }}>
-          {greeting},
+      <div className="anim-fade-up" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--lin-text-4)', fontWeight: 500, marginBottom: 6 }}>
+            {greeting},
+          </div>
+          <h1 style={{
+            fontSize: 30, fontWeight: 700, letterSpacing: '-0.7px',
+            color: 'var(--lin-text-1)', marginBottom: 6,
+          }}>
+            {user?.displayName ?? user?.username ?? 'Welcome'}
+          </h1>
+          <p style={{ color: 'var(--lin-text-3)', fontSize: 14 }}>
+            Here's what's happening across your workspace.
+          </p>
         </div>
-        <h1 style={{
-          fontSize: 30, fontWeight: 700, letterSpacing: '-0.7px',
-          color: 'var(--lin-text-1)', marginBottom: 6,
-        }}>
-          {user?.displayName ?? user?.username ?? 'Welcome'}
-        </h1>
-        <p style={{ color: 'var(--lin-text-3)', fontSize: 14 }}>
-          Here's what's happening across your workspace.
-        </p>
+        <button
+          onClick={() => setShowExport(true)}
+          className="btn"
+          style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: 8, padding: '9px 14px', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(16,185,129,0.2)', transition: 'all 0.18s', flexShrink: 0, marginTop: 4 }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.18)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.1)'; }}
+        >
+          <IconDownload size={15} /> Export
+        </button>
       </div>
+      {showExport && <ExportModal onClose={() => setShowExport(false)} />}
 
       {/* Stats grid */}
       <div style={{

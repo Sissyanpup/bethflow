@@ -59,10 +59,10 @@ export async function exportUserData(userId: string) {
           include: {
             cards: {
               orderBy: { position: 'asc' },
-              select: {
-                id: true, title: true, description: true, color: true,
-                isArchived: true, mediaUrl: true, startDate: true, endDate: true,
-                createdAt: true, updatedAt: true,
+              include: {
+                catalog: { select: { title: true } },
+                linkedTask: { select: { status: true } },
+                checklist: { orderBy: { position: 'asc' }, select: { text: true, isChecked: true, createdAt: true } },
               },
             },
           },
@@ -71,7 +71,19 @@ export async function exportUserData(userId: string) {
     }),
     prisma.project.findMany({
       where: { ownerId: userId },
-      include: { tasks: { orderBy: { position: 'asc' } } },
+      include: {
+        tasks: {
+          orderBy: { position: 'asc' },
+          include: {
+            linkedCard: {
+              select: {
+                title: true,
+                list: { select: { title: true, board: { select: { title: true } } } },
+              },
+            },
+          },
+        },
+      },
     }),
     prisma.catalog.findMany({ where: { ownerId: userId }, orderBy: { createdAt: 'asc' } }),
     prisma.socialLink.findMany({ where: { userId }, orderBy: { position: 'asc' } }),
@@ -91,8 +103,15 @@ export async function exportUserData(userId: string) {
       lists: b.lists.map((l) => ({
         id: l.id, title: l.title, position: l.position, isArchived: l.isArchived,
         cards: l.cards.map((c) => ({
-          ...c, startDate: d(c.startDate), endDate: d(c.endDate),
+          id: c.id, title: c.title, description: c.description, color: c.color,
+          isArchived: c.isArchived, mediaUrl: c.mediaUrl,
+          catalogName: c.catalog?.title ?? null,
+          taskStatus: c.linkedTask?.status ?? null,
+          startDate: d(c.startDate), endDate: d(c.endDate),
           createdAt: d(c.createdAt), updatedAt: d(c.updatedAt),
+          checklist: c.checklist.map((ci) => ({
+            text: ci.text, isChecked: ci.isChecked, createdAt: d(ci.createdAt),
+          })),
         })),
       })),
     })),
@@ -102,6 +121,12 @@ export async function exportUserData(userId: string) {
       tasks: p.tasks.map((t) => ({
         id: t.id, title: t.title, description: t.description, status: t.status,
         startDate: d(t.startDate), endDate: d(t.endDate),
+        createdAt: d(t.createdAt), updatedAt: d(t.updatedAt),
+        linkedCard: t.linkedCard ? {
+          title: t.linkedCard.title,
+          listTitle: t.linkedCard.list.title,
+          boardTitle: t.linkedCard.list.board.title,
+        } : null,
       })),
     })),
     catalogs: catalogs.map((c) => ({

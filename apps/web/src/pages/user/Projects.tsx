@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from '../../lib/api.js';
-import { IconPlus, IconX, IconCalendar, IconChevronRight, IconTrash } from '../../components/ui/icons.js';
+import { IconPlus, IconX, IconCalendar, IconChevronRight, IconTrash, IconDownload } from '../../components/ui/icons.js';
 import { format } from 'date-fns';
+import { ExportModal } from '../../components/board/ExportModal.js';
 
 interface Project { id: string; title: string; description: string | null; createdAt: string; }
 
@@ -12,6 +13,7 @@ const PROJECT_COLORS = ['#7170ff', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '
 export function ProjectsPage() {
   const qc = useQueryClient();
   const [showNew, setShowNew] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [title, setTitle] = useState('');
 
   const { data, isLoading } = useQuery({
@@ -42,20 +44,33 @@ export function ProjectsPage() {
             {data ? `${data.length} project${data.length !== 1 ? 's' : ''}` : 'Loading…'}
           </p>
         </div>
-        <button
-          onClick={() => setShowNew(true)}
-          className="btn"
-          style={{
-            background: 'linear-gradient(135deg, #10b981, #0891b2)',
-            color: '#fff', borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 600,
-            display: 'flex', alignItems: 'center', gap: 6,
-            boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
-            transition: 'all 0.18s',
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 20px rgba(16,185,129,0.45)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(16,185,129,0.35)'; }}>
-          <IconPlus size={15} /> New Project
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => setShowExport(true)}
+            className="btn"
+            style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: 8, padding: '9px 14px', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(16,185,129,0.2)', transition: 'all 0.18s' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.18)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.1)'; }}
+          >
+            <IconDownload size={15} /> Export
+          </button>
+          <button
+            onClick={() => setShowNew(true)}
+            className="btn"
+            style={{
+              background: 'linear-gradient(135deg, #10b981, #0891b2)',
+              color: '#fff', borderRadius: 8, padding: '9px 16px', fontSize: 13, fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6,
+              boxShadow: '0 4px 14px rgba(16,185,129,0.35)',
+              transition: 'all 0.18s',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 20px rgba(16,185,129,0.45)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(16,185,129,0.35)'; }}
+          >
+            <IconPlus size={15} /> New Project
+          </button>
+        </div>
+        {showExport && <ExportModal onClose={() => setShowExport(false)} />}
       </div>
 
       {/* Create form */}

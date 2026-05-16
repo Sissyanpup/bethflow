@@ -87,9 +87,9 @@ export function SocialLinksPage() {
   };
 
   return (
-    <div className="page-content" style={{ color: 'var(--lin-text-1)', maxWidth: 760 }}>
+    <div className="page-content" style={{ color: 'var(--lin-text-1)', maxWidth: 760, margin: '0 auto' }}>
       {/* Header */}
-      <div className="anim-fade-up" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+      <div className="anim-fade-up sl-page-header">
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.7px', marginBottom: 4 }}>My Social Links</h1>
           <p style={{ color: 'var(--lin-text-3)', fontSize: 14 }}>

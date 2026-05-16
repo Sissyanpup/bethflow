@@ -121,23 +121,36 @@ async function autoLinkToTimeline(
   startDate: Date,
   endDate: Date,
 ) {
-  // If already linked, just update task dates
+  const projectTitle = card.list.title;
+
   if (card.taskId) {
-    await prisma.task.update({
+    // Task already linked — update dates and relocate to correct project if list changed
+    const existingTask = await prisma.task.findUnique({
       where: { id: card.taskId },
-      data: { startDate, endDate },
+      include: { project: { select: { title: true } } },
     });
+    const updateData: Parameters<typeof prisma.task.update>[0]['data'] = { startDate, endDate };
+
+    if (existingTask && existingTask.project.title !== projectTitle) {
+      let destProject = await prisma.project.findFirst({ where: { ownerId: userId, title: projectTitle } });
+      if (!destProject) {
+        destProject = await prisma.project.create({ data: { title: projectTitle, ownerId: userId } });
+      }
+      const maxPos = await prisma.task.aggregate({ where: { projectId: destProject.id }, _max: { position: true } });
+      updateData.projectId = destProject.id;
+      updateData.position = (maxPos._max.position ?? -1) + 1;
+    }
+
+    await prisma.task.update({ where: { id: card.taskId }, data: updateData });
     return;
   }
 
-  // Find or create project named after the list
-  const projectTitle = card.list.title;
+  // No task yet — find or create project named after the list, then create task
   let project = await prisma.project.findFirst({ where: { ownerId: userId, title: projectTitle } });
   if (!project) {
     project = await prisma.project.create({ data: { title: projectTitle, ownerId: userId } });
   }
 
-  // Create task and link it
   const maxPos = await prisma.task.aggregate({ where: { projectId: project.id }, _max: { position: true } });
   const task = await prisma.task.create({
     data: {
@@ -181,6 +194,25 @@ export async function reorderCard(userId: string, input: ReorderCardsInput) {
       await Promise.all(remaining.map((c, i) => tx.card.update({ where: { id: c.id }, data: { position: i } })));
     }
   });
+
+  // When card crosses lists, relocate its linked task to the destination list's project
+  if (sourceListId !== destinationListId) {
+    const card = await prisma.card.findUnique({ where: { id: cardId }, select: { taskId: true } });
+    if (card?.taskId) {
+      const destList = await prisma.list.findUnique({ where: { id: destinationListId }, select: { title: true } });
+      if (destList) {
+        let destProject = await prisma.project.findFirst({ where: { ownerId: userId, title: destList.title } });
+        if (!destProject) {
+          destProject = await prisma.project.create({ data: { title: destList.title, ownerId: userId } });
+        }
+        const maxPos = await prisma.task.aggregate({ where: { projectId: destProject.id }, _max: { position: true } });
+        await prisma.task.update({
+          where: { id: card.taskId },
+          data: { projectId: destProject.id, position: (maxPos._max.position ?? -1) + 1 },
+        });
+      }
+    }
+  }
 
   emitBoardEvent(sourceList.boardId, 'card:moved', { cardId, sourceListId, destinationListId, newPosition });
 }
