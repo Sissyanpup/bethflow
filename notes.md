@@ -16,7 +16,6 @@
 ## Error Bug
 
 - ✅ Fixed (rev9) — Refresh loop saat restart docker. Root cause: axios interceptor memanggil `window.location.href = '/login'` dari dalam request `/auth/refresh` → infinite reload. Fix: skip interceptor retry jika request adalah refresh, dan guard StrictMode double-effect dengan `useRef`.
-- Tidak bisa save boards to public or private.
 
 ## Export — ✅ Selesai (rev14)
 
