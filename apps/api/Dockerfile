@@ -33,6 +33,7 @@ RUN npm -w apps/api run build
 # Production
 FROM node:22-alpine AS production
 ENV NODE_ENV=production
+RUN apk add --no-cache openssl
 WORKDIR /workspace
 COPY package*.json ./
 COPY packages/shared/package*.json ./packages/shared/
