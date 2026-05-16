@@ -45,7 +45,7 @@ export function GuestHomePage() {
   return (
     <main>
       {/* ── HERO ── */}
-      <section style={{
+      <section className="hero-section" style={{
         position: 'relative',
         background: 'linear-gradient(135deg, #5b21b6 0%, #1d4ed8 55%, #0891b2 100%)',
         backgroundSize: '200% 200%',
@@ -74,29 +74,30 @@ export function GuestHomePage() {
         </p>
 
         {/* Search bar */}
-        <form onSubmit={handleSearch} className="anim-fade-up delay-300" style={{ background: '#fff', borderRadius: 16, boxShadow: inputFocused ? '0 0 0 4px rgba(124,58,237,0.25), 0 20px 60px rgba(0,0,0,0.18)' : '0 8px 40px rgba(0,0,0,0.18)', padding: '6px 6px 6px 20px', maxWidth: 500, width: '100%', display: 'flex', gap: 8, alignItems: 'center', transition: 'box-shadow 0.2s ease' }}>
+        <form onSubmit={handleSearch} className="hero-search-form anim-fade-up delay-300" style={{ background: '#fff', borderRadius: 16, boxShadow: inputFocused ? '0 0 0 4px rgba(124,58,237,0.25), 0 20px 60px rgba(0,0,0,0.18)' : '0 8px 40px rgba(0,0,0,0.18)', padding: '6px 6px 6px 20px', maxWidth: 500, width: '100%', display: 'flex', gap: 8, alignItems: 'center', transition: 'box-shadow 0.2s ease' }}>
           <IconSearch size={18} style={{ color: '#9ca3af', flexShrink: 0 }} />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setInputFocused(true)}
             onBlur={() => setInputFocused(false)}
-            placeholder="Search users by username or name…"
-            aria-label="Search users"
-            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, color: '#374151', background: 'transparent', padding: '4px 0' }}
+            placeholder="Search users…"
+            aria-label="Search users by username or name"
+            className="hero-search-input"
+            style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', fontSize: 16, color: '#374151', background: 'transparent', padding: '4px 0' }}
           />
           {query && (
-            <button type="button" onClick={clearSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '2px 4px' }}>
+            <button type="button" onClick={clearSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '2px 4px', flexShrink: 0 }}>
               <IconX size={16} />
             </button>
           )}
-          <button type="submit" className="btn btn-gradient" style={{ borderRadius: 10, padding: '10px 20px', fontSize: 14 }}>
+          <button type="submit" className="btn btn-gradient hero-search-btn" style={{ borderRadius: 10, padding: '10px 20px', fontSize: 14, flexShrink: 0 }}>
             Search
           </button>
         </form>
 
         {/* CTA */}
-        <div className="anim-fade-up delay-400" style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 28 }}>
+        <div className="hero-cta anim-fade-up delay-400" style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 28 }}>
           <Link to="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', color: '#7c3aed', padding: '11px 24px', borderRadius: 10, fontWeight: 700, fontSize: 15, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', transition: 'transform 0.18s, box-shadow 0.18s' }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 28px rgba(0,0,0,0.18)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)'; }}>

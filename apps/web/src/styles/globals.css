@@ -1333,3 +1333,34 @@ img, svg { display: block; max-width: 100%; }
   font-weight: 600;
   padding: 0 5px;
 }
+
+/* ===== GUEST HOME — HERO SEARCH RESPONSIVE ===== */
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 72px 16px 56px !important;
+  }
+
+  .hero-search-form {
+    padding: 5px 5px 5px 12px !important;
+    gap: 6px !important;
+  }
+
+  .hero-search-input {
+    font-size: 14px !important;
+    min-width: 0 !important;
+  }
+
+  .hero-search-btn {
+    padding: 9px 13px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .hero-cta {
+    flex-wrap: wrap;
+    gap: 12px !important;
+    justify-content: center;
+  }
+}
