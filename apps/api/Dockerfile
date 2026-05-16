@@ -41,6 +41,8 @@ RUN npm ci --omit=dev
 COPY --from=builder /workspace/apps/api/dist ./apps/api/dist
 COPY --from=builder /workspace/node_modules/.prisma ./node_modules/.prisma
 COPY apps/api/prisma ./apps/api/prisma
+COPY apps/api/entrypoint.sh ./apps/api/entrypoint.sh
+RUN chmod +x apps/api/entrypoint.sh
 WORKDIR /workspace/apps/api
 EXPOSE 4000
-CMD ["node", "dist/app.js"]
+ENTRYPOINT ["./entrypoint.sh"]

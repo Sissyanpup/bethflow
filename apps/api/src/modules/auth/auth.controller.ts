@@ -130,6 +130,37 @@ export async function logout(req: Request, res: Response): Promise<void> {
   res.json({ success: true, data: null });
 }
 
+export async function forgotPassword(req: Request, res: Response): Promise<void> {
+  const { email } = req.body as { email: string };
+  try {
+    await authService.forgotPassword(email);
+  } catch (err) {
+    const e = err as Error & { code?: string };
+    if (e.code === 'TOO_MANY_REQUESTS') {
+      res.status(429).json({ success: false, error: { code: 'TOO_MANY_REQUESTS', message: e.message } });
+      return;
+    }
+    throw err;
+  }
+  // Always same response to prevent email enumeration
+  res.json({ success: true, data: { message: 'If that email is registered, a reset link has been sent' } });
+}
+
+export async function resetPassword(req: Request, res: Response): Promise<void> {
+  const { token, password } = req.body as { token: string; password: string };
+  try {
+    await authService.resetPassword(token, password);
+    res.json({ success: true, data: { message: 'Password berhasil direset. Silakan login.' } });
+  } catch (err) {
+    const e = err as Error & { code?: string };
+    if (e.code === 'INVALID_TOKEN') {
+      res.status(400).json({ success: false, error: { code: 'INVALID_TOKEN', message: e.message } });
+      return;
+    }
+    throw err;
+  }
+}
+
 export async function issueBotToken(req: Request, res: Response): Promise<void> {
   const { email, password } = req.body as { email: string; password: string };
   try {

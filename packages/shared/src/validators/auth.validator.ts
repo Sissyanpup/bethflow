@@ -35,7 +35,23 @@ export const VerifyOtpSchema = z.object({
   code: z.string().length(6).regex(/^\d{6}$/, 'Code must be 6 digits'),
 });
 
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const ResetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z
+    .string()
+    .min(8)
+    .max(72)
+    .regex(/[A-Z]/, 'Must contain uppercase')
+    .regex(/[0-9]/, 'Must contain a number'),
+});
+
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type SendOtpInput = z.infer<typeof SendOtpSchema>;
 export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>;
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;

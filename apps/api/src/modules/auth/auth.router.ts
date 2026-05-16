@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { validate } from '../../middleware/validate.middleware.js';
 import { authRateLimit, otpRateLimit } from '../../middleware/rate-limit.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
-import { LoginSchema, RegisterSchema, SendOtpSchema, VerifyOtpSchema } from '@bethflow/shared';
+import { LoginSchema, RegisterSchema, SendOtpSchema, VerifyOtpSchema, ForgotPasswordSchema, ResetPasswordSchema } from '@bethflow/shared';
 import * as ctrl from './auth.controller.js';
 
 export const authRouter = Router();
@@ -13,5 +13,7 @@ authRouter.post('/refresh', ctrl.refresh);
 authRouter.post('/logout', ctrl.logout);
 authRouter.post('/send-otp', authRateLimit, validate(SendOtpSchema), ctrl.sendOtp);
 authRouter.post('/verify-otp', otpRateLimit, validate(VerifyOtpSchema), ctrl.verifyOtp);
+authRouter.post('/forgot-password', authRateLimit, validate(ForgotPasswordSchema), ctrl.forgotPassword);
+authRouter.post('/reset-password', validate(ResetPasswordSchema), ctrl.resetPassword);
 authRouter.post('/bot-token', authRateLimit, validate(LoginSchema), ctrl.issueBotToken);
 authRouter.delete('/bot-token', authenticate, ctrl.revokeMyBotToken);

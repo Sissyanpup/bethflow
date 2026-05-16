@@ -19,6 +19,8 @@ import { ContactPage } from './pages/guest/Contact.js';
 import { LoginPage } from './pages/auth/Login.js';
 import { RegisterPage } from './pages/auth/Register.js';
 import { VerifyEmailPage } from './pages/auth/VerifyEmail.js';
+import { ForgotPasswordPage } from './pages/auth/ForgotPassword.js';
+import { ResetPasswordPage } from './pages/auth/ResetPassword.js';
 import { UserDashboardPage } from './pages/user/Dashboard.js';
 import { BoardsPage } from './pages/user/Boards.js';
 import { BoardDetailPage } from './pages/user/BoardDetail.js';
@@ -45,6 +47,8 @@ const authLayoutRoute = createRoute({ getParentRoute: () => rootRoute, id: 'auth
 const loginRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/login', component: LoginPage });
 const registerRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/register', component: RegisterPage });
 const verifyEmailRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/verify-email', component: VerifyEmailPage });
+const forgotPasswordRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/forgot-password', component: ForgotPasswordPage });
+const resetPasswordRoute = createRoute({ getParentRoute: () => authLayoutRoute, path: '/reset-password', component: ResetPasswordPage });
 
 // User routes (auth required)
 const userLayoutRoute = createRoute({
@@ -81,7 +85,7 @@ const notFoundRoute = createRoute({ getParentRoute: () => rootRoute, path: '*', 
 
 const routeTree = rootRoute.addChildren([
   guestLayoutRoute.addChildren([homeRoute, contactRoute, publicProfileRoute]),
-  authLayoutRoute.addChildren([loginRoute, registerRoute, verifyEmailRoute]),
+  authLayoutRoute.addChildren([loginRoute, registerRoute, verifyEmailRoute, forgotPasswordRoute, resetPasswordRoute]),
   userLayoutRoute.addChildren([dashboardRoute, boardsRoute, boardDetailRoute, projectsRoute, projectDetailRoute, catalogsRoute, socialLinksRoute]),
   adminLayoutRoute.addChildren([adminDashboardRoute, adminUsersRoute]),
   notFoundRoute,

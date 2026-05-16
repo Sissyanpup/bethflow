@@ -91,6 +91,14 @@ export function LoginPage() {
             <label htmlFor="login-password" style={{ fontSize: 13, fontWeight: 600, color: 'var(--fig-text-body)' }}>
               Password
             </label>
+            <Link
+              to="/forgot-password"
+              style={{ fontSize: 12, color: 'var(--fig-purple)', fontWeight: 500, textDecoration: 'none', transition: 'opacity 0.15s' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+            >
+              Lupa password?
+            </Link>
           </div>
           <div style={{ position: 'relative' }}>
             <input

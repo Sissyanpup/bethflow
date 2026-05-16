@@ -1,4 +1,4 @@
-# Bethflow — Progress Snapshot (2026-05-15 rev9)
+# Bethflow — Progress Snapshot (2026-05-16 rev14)
 
 > Ringkasan status proyek untuk AI agent. Baca ini sebelum mulai bekerja.
 
@@ -6,51 +6,56 @@
 
 ## Status Umum
 
-| Layer                    | Status                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| Docker (4 container)     | ✅ Running                                                                      |
-| PostgreSQL 16            | ✅ Up + healthy                                                                 |
-| Redis 7                  | ✅ Up + healthy                                                                 |
-| API (Express 5)          | ✅ Running `:4000`                                                              |
-| Web (React + Vite)       | ✅ Running `:5173`                                                              |
-| Prisma migration         | ✅ Applied (`20260515000002_add_catalog_group`)                                 |
-| DB seed                  | ✅ Done — admin + demo user + dummy data                                        |
-| Semua halaman            | ✅ Diverifikasi di browser (rev3)                                               |
-| Card Modal (Trello)      | ✅ Implemented (rev4)                                                           |
-| Archive Card/List        | ✅ Implemented (rev4)                                                           |
-| Guest Search Cards       | ✅ Implemented (rev4)                                                           |
-| Public Profile Stats     | ✅ Implemented (rev4)                                                           |
-| Admin Full CRUD          | ✅ Implemented (rev4)                                                           |
-| Export Excel             | ✅ Implemented (rev4) — xlsx installed                                          |
-| Admin Login Redirect     | ✅ Fixed (rev5) — ADMIN role redirects to `/admin` on login                    |
-| DnD Bug Fix              | ✅ Fixed (rev5) — arrayMove same-list, useDroppable empty list                 |
-| Board Edit Modal         | ✅ Implemented (rev5) — title/desc/color + isPublic (Private/Public toggle)    |
-| Board isPublic           | ✅ Implemented (rev5) — migration applied, API updated, shared package rebuilt |
-| Card Three-Dot Removed   | ✅ Fixed (rev5) — click card = CardModal; Delete added to modal sidebar        |
-| Public Boards            | ✅ Implemented (rev5) — /api/public/:username/boards + PublicProfile section   |
-| CSP eval blocked         | ✅ Fixed (rev6) — Helmet contentSecurityPolicy dimatikan di API (API = JSON)   |
-| Login sering gagal       | ✅ Fixed (rev6) — Redis store + IP:email key + max 20 + xfwd proxy             |
-| Dark/Light/System mode   | ✅ Implemented (rev6) — ThemeToggle di semua layout, persist localStorage      |
-| Responsive mobile        | ✅ Fixed (rev6) — drawer sidebar UserLayout/AdminLayout, mobile nav GuestLayout |
-| Root "/" redirect        | ✅ Fixed (rev6) — GuestLayout auth-aware: logged-in → Dashboard button         |
-| Dark mode bugs           | ✅ Fixed (rev7) — Catalogs/AuthLayout/GuestHome/GuestLayout/Login/ProjectDetail |
-| Board-Project integration| ✅ Implemented (rev7) — Card dates auto-link to Project task (find/create)      |
-| Status dots on Kanban    | ✅ Implemented (rev7) — Colored dot on card if linked task exists               |
-| CardModal task status    | ✅ Implemented (rev7) — TaskStatusPicker in sidebar when task is linked          |
-| Catalog status dots      | ✅ Implemented (rev7) — Status count badges on catalog cards                    |
-| Responsive Gantt mobile  | ✅ Fixed (rev7) — task name col: clamp(200px,30vw,360px)                       |
-| Auth hard-refresh logout | ✅ Fixed (rev8) — AppRoot wrapper calls refresh() before RouterProvider renders  |
-| Logo login/regis link    | ✅ Fixed (rev8) — Left-panel logo in AuthLayout wrapped with Link to="/"        |
-| ProjectDetail task modal | ✅ Implemented (rev8) — Edit task modal: title, description, status, dates      |
-| Task add form            | ✅ Enhanced (rev8) — Add task form now includes description + status selector    |
-| Catalogs group system    | ✅ Implemented (rev8) — group field (DB + API + UI): grouped view + edit modal  |
-| Auth refresh loop fix    | ✅ Fixed (rev9) — axios interceptor skip retry on /auth/refresh + useRef guard  |
-| Email OTP verification   | ✅ Implemented (rev10) — register→OTP email→verify-otp→auto-login; Ethereal dev preview in logs |
-| Login enforce isVerified | ✅ Fixed (rev11) — loginUser() cek isVerified → 403 EMAIL_NOT_VERIFIED → frontend redirect /verify-email |
-| OTP brute force guard    | ✅ Fixed (rev11) — otpRateLimit: 5 attempt/10 menit (terpisah dari authRateLimit 20/15min) |
-| XSS card/checklist/cmnt  | ✅ Fixed (rev11) — sanitizeHtml (plain text) di cards.service.ts: title, desc, checklist, comment |
-| Infrastruktur produksi   | ✅ Fixed (rev11) — docker-compose.prod.yml, env validation, nginx security headers, .env.production.example |
-| TypeScript 0 errors      | ✅ Fixed (rev11) — semua 17 file: req.params as string, exactOptionalPropertyTypes Prisma spreads |
+| Layer                     | Status                                                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Docker (4 container)      | ✅ Running                                                                                                  |
+| PostgreSQL 16             | ✅ Up + healthy                                                                                             |
+| Redis 7                   | ✅ Up + healthy                                                                                             |
+| API (Express 5)           | ✅ Running `:4000`                                                                                          |
+| Web (React + Vite)        | ✅ Running `:5173`                                                                                          |
+| Prisma migration          | ✅ Applied (`20260515000002_add_catalog_group`)                                                             |
+| DB seed                   | ✅ Done — admin + demo user + dummy data                                                                    |
+| Semua halaman             | ✅ Diverifikasi di browser (rev3)                                                                           |
+| Card Modal (Trello)       | ✅ Implemented (rev4)                                                                                       |
+| Archive Card/List         | ✅ Implemented (rev4)                                                                                       |
+| Guest Search Cards        | ✅ Implemented (rev4)                                                                                       |
+| Public Profile Stats      | ✅ Implemented (rev4)                                                                                       |
+| Admin Full CRUD           | ✅ Implemented (rev4)                                                                                       |
+| Export Excel              | ✅ Implemented (rev4) — xlsx installed                                                                      |
+| Admin Login Redirect      | ✅ Fixed (rev5) — ADMIN role redirects to `/admin` on login                                                 |
+| DnD Bug Fix               | ✅ Fixed (rev5) — arrayMove same-list, useDroppable empty list                                              |
+| Board Edit Modal          | ✅ Implemented (rev5) — title/desc/color + isPublic (Private/Public toggle)                                 |
+| Board isPublic            | ✅ Implemented (rev5) — migration applied, API updated, shared package rebuilt                              |
+| Card Three-Dot Removed    | ✅ Fixed (rev5) — click card = CardModal; Delete added to modal sidebar                                     |
+| Public Boards             | ✅ Implemented (rev5) — /api/public/:username/boards + PublicProfile section                                |
+| CSP eval blocked          | ✅ Fixed (rev6) — Helmet contentSecurityPolicy dimatikan di API (API = JSON)                                |
+| Login sering gagal        | ✅ Fixed (rev6) — Redis store + IP:email key + max 20 + xfwd proxy                                          |
+| Dark/Light/System mode    | ✅ Implemented (rev6) — ThemeToggle di semua layout, persist localStorage                                   |
+| Responsive mobile         | ✅ Fixed (rev6) — drawer sidebar UserLayout/AdminLayout, mobile nav GuestLayout                             |
+| Root "/" redirect         | ✅ Fixed (rev6) — GuestLayout auth-aware: logged-in → Dashboard button                                      |
+| Dark mode bugs            | ✅ Fixed (rev7) — Catalogs/AuthLayout/GuestHome/GuestLayout/Login/ProjectDetail                             |
+| Board-Project integration | ✅ Implemented (rev7) — Card dates auto-link to Project task (find/create)                                  |
+| Status dots on Kanban     | ✅ Implemented (rev7) — Colored dot on card if linked task exists                                           |
+| CardModal task status     | ✅ Implemented (rev7) — TaskStatusPicker in sidebar when task is linked                                     |
+| Catalog status dots       | ✅ Implemented (rev7) — Status count badges on catalog cards                                                |
+| Responsive Gantt mobile   | ✅ Fixed (rev7) — task name col: clamp(200px,30vw,360px)                                                    |
+| Auth hard-refresh logout  | ✅ Fixed (rev8) — AppRoot wrapper calls refresh() before RouterProvider renders                             |
+| Logo login/regis link     | ✅ Fixed (rev8) — Left-panel logo in AuthLayout wrapped with Link to="/"                                    |
+| ProjectDetail task modal  | ✅ Implemented (rev8) — Edit task modal: title, description, status, dates                                  |
+| Task add form             | ✅ Enhanced (rev8) — Add task form now includes description + status selector                               |
+| Catalogs group system     | ✅ Implemented (rev8) — group field (DB + API + UI): grouped view + edit modal                              |
+| Auth refresh loop fix     | ✅ Fixed (rev9) — axios interceptor skip retry on /auth/refresh + useRef guard                              |
+| Email OTP verification    | ✅ Implemented (rev10) — register→OTP email→verify-otp→auto-login; Ethereal dev preview in logs             |
+| Login enforce isVerified  | ✅ Fixed (rev11) — loginUser() cek isVerified → 403 EMAIL_NOT_VERIFIED → frontend redirect /verify-email    |
+| OTP brute force guard     | ✅ Fixed (rev11) — otpRateLimit: 5 attempt/10 menit (terpisah dari authRateLimit 20/15min)                  |
+| XSS card/checklist/cmnt   | ✅ Fixed (rev11) — sanitizeHtml (plain text) di cards.service.ts: title, desc, checklist, comment           |
+| Infrastruktur produksi    | ✅ Fixed (rev11) — docker-compose.prod.yml, env validation, nginx security headers, .env.production.example |
+| TypeScript 0 errors       | ✅ Fixed (rev11) — semua 17 file: req.params as string, exactOptionalPropertyTypes Prisma spreads           |
+| Export Excel (rev14)      | ✅ Enhanced — 3 tab: Boards & Cards, Projects & Tasks, All Data (6 sheet untuk ML/DSS)                      |
+| Export button             | ✅ Added (rev14) — tombol Export di Dashboard dan Projects (sebelumnya hanya di Boards)                     |
+| Navbar sync indicator     | ✅ Added (rev14) — thin sweep bar + spinner "Saving…" saat ada mutation pending (useIsMutating)             |
+| Cross-list task relocate  | ✅ Fixed (rev14) — drag card antar list → linked task otomatis pindah ke project nama list tujuan           |
+| Forgot Password           | ✅ Implemented (rev14) — /forgot-password → email link → /reset-password?token= → password baru             |
 
 ---
 
@@ -147,10 +152,11 @@ betha-trello/
 │       └── src/pages/
 │           ├── guest/   GuestLayout, GuestHome (search cards), Contact,
 │           │            PublicProfile (stats + public boards section rev5)
-│           ├── auth/    AuthLayout, Login (admin->'/admin' redirect rev5), Register
-│           ├── user/    UserLayout, Dashboard, Boards (+ Export),
-│           │            BoardDetail (DnD fixed + Edit board modal rev5),
-│           │            Projects, ProjectDetail, Catalogs, SocialLinks
+│           ├── auth/    AuthLayout, Login (+ "Lupa password?" rev14), Register,
+│           │            VerifyEmail, ForgotPassword (rev14), ResetPassword (rev14)
+│           ├── user/    UserLayout (sync indicator rev14), Dashboard (+ Export rev14),
+│           │            Boards (+ Export), BoardDetail, Projects (+ Export rev14),
+│           │            ProjectDetail, Catalogs, SocialLinks
 │           └── admin/   AdminLayout, AdminDashboard, AdminUsers (full CRUD + profile modal)
 └── packages/shared/src/
     ├── types/index.ts               <- Board.isPublic added (rev5)
@@ -163,7 +169,7 @@ betha-trello/
 ## API Routes (Semua Sudah Diimplementasi)
 
 ```
-POST   /api/auth/register|login|refresh|logout
+POST   /api/auth/register|login|refresh|logout|forgot-password|reset-password
 GET    /api/users/me
 GET    /api/users/:id  |  PATCH  |  DELETE (admin)
 
@@ -213,20 +219,23 @@ GET                 /health
 
 ## Database Schema (Ringkasan Model)
 
-| Model         | Relasi utama                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| User          | boards[], projects[], catalogs[], socialLinks[], refreshTokens[], cardComments[]            |
-| RefreshToken  | -> User                                                                                     |
-| Board         | -> User (owner), lists[] · isPublic Boolean default(false) (rev5)                          |
-| List          | -> Board, cards[] · isArchived Boolean                                                      |
-| Card          | -> List, -> Catalog?, -> Task? (taskId @unique) · isArchived · color · checklist[], comments[] |
-| ChecklistItem | -> Card, text, isChecked, position (rev4)                                                   |
-| CardComment   | -> Card, -> User, content (rev4)                                                            |
-| Catalog       | -> User (owner), cards[]                                                                    |
-| Project       | -> User (owner), tasks[]                                                                    |
-| Task          | -> Project, status: TaskStatus enum · linkedCard Card? (back-rel)                           |
-| SocialLink    | -> User, platform, label, url, isVisible, position                                          |
-| Feedback      | -> User?                                                                                    |
+| Model              | Relasi utama                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| User               | boards[], projects[], catalogs[], socialLinks[], refreshTokens[], cardComments[]               |
+| RefreshToken       | -> User                                                                                        |
+| Board              | -> User (owner), lists[] · isPublic Boolean default(false) (rev5)                              |
+| List               | -> Board, cards[] · isArchived Boolean                                                         |
+| Card               | -> List, -> Catalog?, -> Task? (taskId @unique) · isArchived · color · checklist[], comments[] |
+| ChecklistItem      | -> Card, text, isChecked, position (rev4)                                                      |
+| CardComment        | -> Card, -> User, content (rev4)                                                               |
+| Catalog            | -> User (owner), cards[]                                                                       |
+| Project            | -> User (owner), tasks[]                                                                       |
+| Task               | -> Project, status: TaskStatus enum · linkedCard Card? (back-rel)                              |
+| SocialLink         | -> User, platform, label, url, isVisible, position                                             |
+| Feedback           | -> User?                                                                                       |
+| OtpToken           | email, code, expiresAt, used                                                                   |
+| PasswordResetToken | email, token (unique), expiresAt, used (rev14)                                                 |
+| BotToken           | -> User, token (unique), expiresAt                                                             |
 
 Enums: Role {GUEST USER ADMIN} · TaskStatus {TODO IN_PROGRESS DONE BLOCKED}
 
@@ -236,11 +245,11 @@ Enums: Role {GUEST USER ADMIN} · TaskStatus {TODO IN_PROGRESS DONE BLOCKED}
 
 3 sistem desain berbeda, TIDAK boleh dicampur dalam satu halaman:
 
-| Halaman                             | Design             | Bg              | Accent                         |
-| ----------------------------------- | ------------------ | --------------- | ------------------------------ |
-| Guest, Social Links publik, Contact | figma-design.md    | #f8f7ff         | #7c3aed purple + multi-color   |
-| User Dashboard, Boards, Admin       | linear-design.md   | #08090a dark    | #7170ff violet                 |
-| Projects, Catalogs, Data grid       | airtable-design.md | #f9fafb light   | #166ee1 blue                   |
+| Halaman                             | Design             | Bg            | Accent                       |
+| ----------------------------------- | ------------------ | ------------- | ---------------------------- |
+| Guest, Social Links publik, Contact | figma-design.md    | #f8f7ff       | #7c3aed purple + multi-color |
+| User Dashboard, Boards, Admin       | linear-design.md   | #08090a dark  | #7170ff violet               |
+| Projects, Catalogs, Data grid       | airtable-design.md | #f9fafb light | #166ee1 blue                 |
 
 CSS globals tersedia di globals.css:
 
@@ -269,31 +278,33 @@ IconSun, IconMoon, IconMonitor
 
 ## Bug Penting yang Sudah Diperbaiki (Rev2–Rev6)
 
-| Bug                                                       | File                                          | Fix                                                                                            |
-| --------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Emoji di UI melanggar CLAUDE.md                           | Contact.tsx, Dashboard.tsx, PublicProfile.tsx | Diganti IconZap, IconShield, hapus emoji, IconAlertCircle                                      |
-| useParams({ from }) pakai URL path, bukan route tree ID   | BoardDetail, ProjectDetail, PublicProfile     | Harus pakai layout prefix: /user-layout/boards/$boardId, /guest-layout/u/$username/links       |
-| Dashboard stat Catalogs & SocialLinks hardcoded           | Dashboard.tsx                                 | Tambah 2 query baru ke /catalogs dan /me/social-links                                          |
-| SocialLinks DnD grip dekoratif (tidak berfungsi)          | SocialLinks.tsx                               | Implementasi @dnd-kit/core + useSortable + reorder mutation                                    |
-| SocialLinks preview link mengarah ke #                    | SocialLinks.tsx                               | Fix ke /u/${user.username}/links                                                               |
-| Delete button tidak ada di Boards, Projects, Catalogs     | Boards, Projects, Catalogs                    | Tambah hover-delete overlay + confirm + mutation                                               |
-| JSX.Element TS error tanpa namespace                      | Dashboard.tsx                                 | Ganti ke ReactElement dari react                                                               |
-| GET /api/social-links/:username return 401                | app.ts                                        | publicSocialLinksRouter dipasang sebelum app.use('/api', authenticate)                         |
-| Card creation 404                                         | seed script                                   | Route sebenarnya adalah POST /cards/list/:listId, bukan /lists/:id/cards                       |
-| reorderCard field mismatch (frontend vs API)              | BoardDetail.tsx                               | Frontend kirim destinationListId/newPosition, bukan targetListId/position                      |
-| xlsx tidak ter-install di container                       | ExportModal.tsx                               | Rebuild container + npm install xlsx di /workspace/apps/web                                    |
-| Admin login goes to /dashboard not /admin                 | Login.tsx                                     | Check user.role === 'ADMIN' after login, redirect to /admin (rev5)                            |
-| DnD same-list reorder tidak bekerja                       | BoardDetail.tsx                               | Pakai arrayMove di handleDragEnd untuk reorder dalam list yang sama (rev5)                     |
-| DnD drop ke list kosong tidak bisa                        | BoardDetail.tsx                               | Tambah useDroppable di KanbanColumn; over.id fallback ke listId (rev5)                        |
-| isPublic tidak tersimpan via PATCH                        | board.validator.ts (packages/shared)          | Shared package harus di-rebuild setelah edit src/ (rev5)                                      |
-| Refresh loop saat restart docker                          | api.ts + main.tsx                             | Interceptor tidak skip retry pada /auth/refresh + useRef guard StrictMode (rev9)              |
-| CSP eval blocked di browser                               | security.middleware.ts                        | Helmet contentSecurityPolicy: false — API serve JSON bukan HTML (rev6)                         |
-| Login sering gagal (rate limit collapse)                  | rate-limit.middleware.ts, app.ts, vite.config | Redis store + initRateLimiters() setelah connectRedis() + key IP:email + max 20 (rev6)        |
-| Login error message tidak informatif                      | Login.tsx                                     | Bedakan 429 ("terlalu banyak percobaan") vs 401 ("salah password") vs error lain (rev6)       |
-| Sidebar tidak collapsible di mobile                       | UserLayout.tsx, AdminLayout.tsx               | Drawer sidebar + overlay + hamburger topbar, CSS: .sidebar-drawer + .mob-topbar (rev6)        |
-| GuestLayout mobile nav tidak ada                          | GuestLayout.tsx                               | Implementasi burger menu + mobile drawer dengan link + auth-aware CTA (rev6)                  |
-| Root "/" menampilkan "Log in" ke user yang sudah login    | GuestLayout.tsx                               | Cek useAuthStore, tampilkan "Dashboard" button jika sudah login (rev6)                        |
-| Semua halaman padding tidak responsive                    | Dashboard, Boards, Projects, dll (9 file)     | Ganti inline padding dengan .page-content class (36px 44px → 20px 16px di mobile) (rev6)     |
+| Bug                                                     | File                                          | Fix                                                                                      |
+| ------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Emoji di UI melanggar CLAUDE.md                         | Contact.tsx, Dashboard.tsx, PublicProfile.tsx | Diganti IconZap, IconShield, hapus emoji, IconAlertCircle                                |
+| useParams({ from }) pakai URL path, bukan route tree ID | BoardDetail, ProjectDetail, PublicProfile     | Harus pakai layout prefix: /user-layout/boards/$boardId, /guest-layout/u/$username/links |
+| Dashboard stat Catalogs & SocialLinks hardcoded         | Dashboard.tsx                                 | Tambah 2 query baru ke /catalogs dan /me/social-links                                    |
+| SocialLinks DnD grip dekoratif (tidak berfungsi)        | SocialLinks.tsx                               | Implementasi @dnd-kit/core + useSortable + reorder mutation                              |
+| SocialLinks preview link mengarah ke #                  | SocialLinks.tsx                               | Fix ke /u/${user.username}/links                                                         |
+| Delete button tidak ada di Boards, Projects, Catalogs   | Boards, Projects, Catalogs                    | Tambah hover-delete overlay + confirm + mutation                                         |
+| JSX.Element TS error tanpa namespace                    | Dashboard.tsx                                 | Ganti ke ReactElement dari react                                                         |
+| GET /api/social-links/:username return 401              | app.ts                                        | publicSocialLinksRouter dipasang sebelum app.use('/api', authenticate)                   |
+| Card creation 404                                       | seed script                                   | Route sebenarnya adalah POST /cards/list/:listId, bukan /lists/:id/cards                 |
+| reorderCard field mismatch (frontend vs API)            | BoardDetail.tsx                               | Frontend kirim destinationListId/newPosition, bukan targetListId/position                |
+| xlsx tidak ter-install di container                     | ExportModal.tsx                               | Rebuild container + npm install xlsx di /workspace/apps/web                              |
+| Admin login goes to /dashboard not /admin               | Login.tsx                                     | Check user.role === 'ADMIN' after login, redirect to /admin (rev5)                       |
+| DnD same-list reorder tidak bekerja                     | BoardDetail.tsx                               | Pakai arrayMove di handleDragEnd untuk reorder dalam list yang sama (rev5)               |
+| DnD drop ke list kosong tidak bisa                      | BoardDetail.tsx                               | Tambah useDroppable di KanbanColumn; over.id fallback ke listId (rev5)                   |
+| isPublic tidak tersimpan via PATCH                      | board.validator.ts (packages/shared)          | Shared package harus di-rebuild setelah edit src/ (rev5)                                 |
+| Refresh loop saat restart docker                        | api.ts + main.tsx                             | Interceptor tidak skip retry pada /auth/refresh + useRef guard StrictMode (rev9)         |
+| Dropdown user tertutup body (z-index)                   | globals.css .ul-navbar                        | Hapus overflow:hidden dari navbar — ditambahkan saat sync bar, memotong dropdown (rev14) |
+| Cross-list task tidak pindah project di timeline        | cards.service.ts reorderCard                  | Setelah drag antar list, cari/buat project tujuan dan pindah task ke sana (rev14)        |
+| CSP eval blocked di browser                             | security.middleware.ts                        | Helmet contentSecurityPolicy: false — API serve JSON bukan HTML (rev6)                   |
+| Login sering gagal (rate limit collapse)                | rate-limit.middleware.ts, app.ts, vite.config | Redis store + initRateLimiters() setelah connectRedis() + key IP:email + max 20 (rev6)   |
+| Login error message tidak informatif                    | Login.tsx                                     | Bedakan 429 ("terlalu banyak percobaan") vs 401 ("salah password") vs error lain (rev6)  |
+| Sidebar tidak collapsible di mobile                     | UserLayout.tsx, AdminLayout.tsx               | Drawer sidebar + overlay + hamburger topbar, CSS: .sidebar-drawer + .mob-topbar (rev6)   |
+| GuestLayout mobile nav tidak ada                        | GuestLayout.tsx                               | Implementasi burger menu + mobile drawer dengan link + auth-aware CTA (rev6)             |
+| Root "/" menampilkan "Log in" ke user yang sudah login  | GuestLayout.tsx                               | Cek useAuthStore, tampilkan "Dashboard" button jika sudah login (rev6)                   |
+| Semua halaman padding tidak responsive                  | Dashboard, Boards, Projects, dll (9 file)     | Ganti inline padding dengan .page-content class (36px 44px → 20px 16px di mobile) (rev6) |
 
 ---
 
@@ -317,23 +328,24 @@ useParams({ from: '/u/$username/links' })              // runtime crash
 
 ## Halaman yang Perlu Pengembangan Lanjutan
 
-| Halaman / Fitur             | Status       | Catatan                                                                                        |
-| --------------------------- | ------------ | ---------------------------------------------------------------------------------------------- |
-| BoardDetail.tsx             | Lengkap      | Kanban + DnD (fixed rev5) + Edit board modal + Card Modal + Archive/Delete                    |
-| GuestHome.tsx               | Lengkap      | Search -> hasil user cards (avatar, bio, counts); klik "View profile" -> PublicProfile        |
-| PublicProfile.tsx           | Lengkap      | Social links + RadialBar stats + Public Boards section (expand/collapse rev5)                 |
-| AdminUsers.tsx              | Lengkap      | CRUD: buat user, edit (role/status), deactivate/restore, view profil (links + stats)          |
-| Login.tsx                   | Lengkap      | Admin redirect ke /admin, user ke /dashboard; error messages 429/401/network (rev6)           |
-| GuestLayout.tsx             | Lengkap      | Mobile nav drawer + auth-aware CTA (Dashboard vs Log in/Get started) (rev6)                  |
-| UserLayout.tsx              | Lengkap      | Dark sidebar + mobile drawer + hamburger topbar + theme toggle (rev6)                         |
-| AdminLayout.tsx             | Lengkap      | Dark sidebar + mobile drawer + hamburger topbar + theme toggle (rev6)                         |
-| ProjectDetail.tsx           | Fungsional   | Timeline Gantt + task list berjalan; header responsive (rev6); gantt area belum full-mobile   |
-| BoardDetail.tsx mobile      | Perlu fix    | Kanban board sudah horizontal-scroll, tapi header padding bisa lebih responsif di HP kecil    |
-| Swagger/OpenAPI docs        | Belum        | Route /api/docs disebut di CLAUDE.md tapi belum dibuat                                        |
-| Email verification          | ✅ Selesai   | OTP 6-digit via Ethereal dev / SMTP prod — rev10                                               |
-| GET /api/me/export (GDPR)   | Belum        |                                                                                                |
-| DELETE /api/me (GDPR)       | Belum        |                                                                                                |
-| Rate limit                  | OK (rev6)    | Batas login 20x/15min per IP:email, Redis-backed. Reset: redis-cli FLUSHDB                   |
+| Halaman / Fitur           | Status     | Catatan                                                                                     |
+| ------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
+| BoardDetail.tsx           | Lengkap    | Kanban + DnD (fixed rev5) + Edit board modal + Card Modal + Archive/Delete                  |
+| GuestHome.tsx             | Lengkap    | Search -> hasil user cards (avatar, bio, counts); klik "View profile" -> PublicProfile      |
+| PublicProfile.tsx         | Lengkap    | Social links + RadialBar stats + Public Boards section (expand/collapse rev5)               |
+| AdminUsers.tsx            | Lengkap    | CRUD: buat user, edit (role/status), deactivate/restore, view profil (links + stats)        |
+| Login.tsx                 | Lengkap    | Admin redirect ke /admin, user ke /dashboard; error messages 429/401/network (rev6)         |
+| GuestLayout.tsx           | Lengkap    | Mobile nav drawer + auth-aware CTA (Dashboard vs Log in/Get started) (rev6)                 |
+| UserLayout.tsx            | Lengkap    | Dark sidebar + mobile drawer + hamburger topbar + theme toggle (rev6)                       |
+| AdminLayout.tsx           | Lengkap    | Dark sidebar + mobile drawer + hamburger topbar + theme toggle (rev6)                       |
+| ProjectDetail.tsx         | Fungsional | Timeline Gantt + task list berjalan; header responsive (rev6); gantt area belum full-mobile |
+| BoardDetail.tsx mobile    | Perlu fix  | Kanban board sudah horizontal-scroll, tapi header padding bisa lebih responsif di HP kecil  |
+| Swagger/OpenAPI docs      | Belum      | Route /api/docs disebut di CLAUDE.md tapi belum dibuat                                      |
+| Email verification        | ✅ Selesai | OTP 6-digit via Ethereal dev / SMTP prod — rev10                                            |
+| GET /api/me/export (GDPR) | ✅ Selesai | Endpoint ada di /api/users/me/export; ExportModal gunakan ini untuk generate XLSX (rev14)   |
+| DELETE /api/me (GDPR)     | ✅ Selesai | Soft-delete via isActive=false + hapus token (rev11)                                        |
+| Forgot Password           | ✅ Selesai | /forgot-password → email link (Ethereal dev) → /reset-password?token= → bcrypt hash (rev14) |
+| Rate limit                | OK (rev6)  | Batas login 20x/15min per IP:email, Redis-backed. Reset: redis-cli FLUSHDB                  |
 
 ---
 

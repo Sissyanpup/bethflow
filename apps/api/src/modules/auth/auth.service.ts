@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../../lib/prisma.js';
-import { sendOtpEmail } from '../../lib/email.js';
+import { sendOtpEmail, sendPasswordResetEmail } from '../../lib/email.js';
 import { logger } from '../../lib/logger.js';
 import type { TokenPayload, AuthTokens } from '@bethflow/shared';
 
@@ -11,6 +11,8 @@ const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const OTP_RESEND_COOLDOWN_MS = 60 * 1000; // 60 seconds
+const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
+const RESET_COOLDOWN_MS = 60 * 1000; // 60 seconds between requests
 
 function getPrivateKey(): string {
   const key = process.env['JWT_PRIVATE_KEY'];
@@ -163,6 +165,53 @@ async function issueTokens(
     access: { accessToken, expiresIn: 15 * 60 },
     refreshToken,
   };
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Silent return if user not found — prevents email enumeration
+  if (!user || !user.isActive) return;
+
+  // Cooldown: prevent spamming
+  const recent = await prisma.passwordResetToken.findFirst({
+    where: { email, used: false },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (recent && recent.createdAt > new Date(Date.now() - RESET_COOLDOWN_MS)) {
+    throw Object.assign(new Error('Please wait before requesting another reset link'), { code: 'TOO_MANY_REQUESTS' });
+  }
+
+  // Invalidate previous tokens for this email
+  await prisma.passwordResetToken.updateMany({ where: { email, used: false }, data: { used: true } });
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + RESET_TTL_MS);
+  await prisma.passwordResetToken.create({ data: { email, token, expiresAt } });
+
+  const baseUrl = process.env['FRONTEND_URL'] ?? 'http://localhost:5173';
+  const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+
+  try {
+    await sendPasswordResetEmail(email, resetUrl);
+  } catch (err) {
+    logger.warn({ err }, 'Failed to send password reset email');
+  }
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const record = await prisma.passwordResetToken.findUnique({ where: { token } });
+  if (!record || record.used || record.expiresAt < new Date()) {
+    throw Object.assign(new Error('Link reset tidak valid atau sudah kadaluarsa'), { code: 'INVALID_TOKEN' });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+
+  await prisma.$transaction([
+    prisma.passwordResetToken.update({ where: { id: record.id }, data: { used: true } }),
+    prisma.user.update({ where: { email: record.email }, data: { passwordHash } }),
+    // Revoke all refresh tokens so existing sessions are invalidated
+    prisma.refreshToken.deleteMany({ where: { user: { email: record.email } } }),
+  ]);
 }
 
 const BOT_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
