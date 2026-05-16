@@ -16,6 +16,7 @@
 ## Error Bug
 
 - ✅ Fixed (rev9) — Refresh loop saat restart docker. Root cause: axios interceptor memanggil `window.location.href = '/login'` dari dalam request `/auth/refresh` → infinite reload. Fix: skip interceptor retry jika request adalah refresh, dan guard StrictMode double-effect dengan `useRef`.
+- Tidak bisa save boards to public or private.
 
 ## Export — ✅ Selesai (rev14)
 
@@ -24,3 +25,9 @@
 - ✅ Sheet Tasks enriched: linkedCard title, list, board name + task createdAt
 - ✅ 3 tab export: "Boards & Cards" (2 sheets + date filter), "Projects & Tasks" (2 sheets + date filter), "All Data" (6 sheets, no filter)
 - ✅ Tombol Export ditambahkan di Dashboard (beranda) dan Projects
+
+## Fitur tambahan
+
+- Jika bisa menambahkan foto profile dengan maks 512kb saja
+- Fitur edit profile saat klik card user di navbar
+- Jika memungkinkan kembangkan menjadi setiap card bisa menambahkan file attachment seperti gambar png, jpg, dll. Hampir menuju mirip trello dengan lebih modern dan rapi

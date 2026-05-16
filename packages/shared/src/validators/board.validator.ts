@@ -11,6 +11,7 @@ export const CreateBoardSchema = z.object({
 
 export const UpdateBoardSchema = CreateBoardSchema.partial().extend({
   isPublic: z.boolean().optional(),
+  description: z.string().max(500).nullish(),
 });
 
 export const CreateListSchema = z.object({
