@@ -1,0 +1,1 @@
+ALTER TABLE "Catalog" ADD COLUMN "group" TEXT;

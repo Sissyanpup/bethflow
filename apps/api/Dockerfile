@@ -40,6 +40,7 @@ COPY packages/shared/package*.json ./packages/shared/
 COPY apps/api/package*.json ./apps/api/
 RUN npm ci --omit=dev
 COPY --from=builder /workspace/apps/api/dist ./apps/api/dist
+COPY --from=builder /workspace/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /workspace/node_modules/.prisma ./node_modules/.prisma
 COPY apps/api/prisma ./apps/api/prisma
 COPY apps/api/entrypoint.sh ./apps/api/entrypoint.sh

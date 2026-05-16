@@ -33,8 +33,7 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
-# Prisma
-apps/api/prisma/migrations/
+# Prisma — migrations tracked intentionally (source of truth for DB schema)
 
 # Docker
 .dockerignore
